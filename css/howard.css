@@ -1,0 +1,5206 @@
+/* Howard the Chronicler - Standalone CSS */
+
+:root {
+  /* Standalone defaults for --s2-* variables (originally from conan2.css) */
+
+  /* Background layers */
+  --s2-bg0: #0B0B0D;
+  --s2-bg1: #121214;
+  --s2-panel: #151519;
+  --s2-panel2: #1B1B20;
+
+  /* Strokes/Borders */
+  --s2-stroke: rgba(255,255,255,0.18);
+  --s2-stroke-strong: rgba(255,255,255,0.30);
+  --s2-border: #444;
+
+  /* Text */
+  --s2-text: #FFFFFF;
+  --s2-muted: rgba(255,255,255,0.60);
+
+  /* Red Accent System */
+  --s2-accent: #E10600;
+  --s2-accent-hover: #FF1A1A;
+  --s2-accent-dim: rgba(225,6,0,0.25);
+  --s2-accent-glow: rgba(225,6,0,0.5);
+
+  /* Layout */
+  --s2-radius-card: 16px;
+  --s2-radius-panel: 22px;
+  --s2-radius-small: 8px;
+
+  /* Shadows */
+  --s2-shadow-card: 0 4px 16px rgba(0,0,0,0.5);
+  --s2-shadow-panel: 0 8px 24px rgba(0,0,0,0.6);
+
+  /* Typography */
+  --s2-font: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* HOWARD THE CHRONICLER - The Chronicle/Forge  */
+
+.conan.sheet.howard {
+  background: var(--s2-bg0);
+  color: var(--s2-text);
+  font-family: var(--s2-font);
+}
+
+.conan.sheet.howard .window-header {
+  background: var(--s2-bg0);
+  border-bottom: 1px solid var(--s2-stroke);
+}
+
+.conan.sheet.howard .window-header .window-title {
+  color: var(--s2-accent);
+  font-family: var(--s2-font);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.conan.sheet.howard .window-content {
+  padding: 0;
+  background: var(--s2-bg0);
+}
+
+.howard-sheet {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--s2-bg0);
+}
+
+.howard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+}
+
+.howard-header {
+  background: linear-gradient(180deg, var(--s2-panel2) 0%, var(--s2-bg1) 100%);
+  border-bottom: 3px solid var(--s2-accent);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.howard-header-hidden {
+  display: none;
+}
+
+/* HOWARD - FULL SCREEN EDITOR LAYOUT           */
+
+.howard-topbar {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: linear-gradient(180deg, var(--s2-panel2) 0%, var(--s2-bg1) 100%);
+  border-bottom: 2px solid var(--s2-accent);
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.howard-topbar-strip-col {
+  width: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.howard-topbar-back {
+  width: 30px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--s2-panel);
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.howard-topbar-back:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+.howard-topbar-btn {
+  background: var(--s2-panel);
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-text);
+  padding: 4px 14px;
+  height: 28px;
+  font-size: 12px;
+  font-family: var(--s2-font);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.5px;
+}
+
+.howard-topbar-btn:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+.howard-play-btn {
+  background: var(--s2-panel2);
+  border-color: #c53030;
+  color: #fc8181;
+}
+
+.howard-play-btn:hover {
+  background: #c53030;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(197, 48, 48, 0.5);
+}
+
+.howard-topbar-btn.active {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+  background: rgba(200, 60, 60, 0.15);
+}
+
+/* Presentation per-element control overlay (eye + zoom icons, centered) */
+.howard-pres-controls {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 12px;
+  z-index: 1000;
+  pointer-events: auto;
+}
+.howard-pres-ctrl {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.7);
+  color: #ddd;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.howard-pres-ctrl:hover {
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  border-color: #fff;
+}
+/* Eye button: show state (visible) — blue tint */
+.howard-pres-eye .fa-eye {
+  color: #63b3ed;
+}
+/* Eye button: hidden state — red tint */
+.howard-pres-eye .fa-eye-slash {
+  color: #fc8181;
+}
+/* Zoom button — purple tint on hover */
+.howard-pres-zoom:hover {
+  border-color: #b794f4;
+  box-shadow: 0 0 8px rgba(128, 90, 213, 0.5);
+}
+
+.howard-hidden-eye {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid #c53030;
+  border-radius: 50%;
+  color: #fc8181;
+  font-size: 16px;
+  pointer-events: none;
+  z-index: 999;
+  box-shadow: 0 0 12px rgba(197, 48, 48, 0.5);
+}
+
+.howard-speech-tail-svg polygon.howard-element-hidden {
+  opacity: 0.25;
+}
+
+.howard-pres-hidden {
+  display: none !important;
+}
+
+.howard-pres-hidden-svg {
+  display: none !important;
+}
+
+.howard-pres-play-btn {
+  background: var(--s2-panel2);
+  border-color: #38a169;
+  color: #68d391;
+}
+
+.howard-pres-play-btn:hover {
+  background: #38a169;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(56, 161, 105, 0.5);
+}
+
+.howard-zoom-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 80px;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.howard-zoom-overlay.howard-zoom-visible {
+  opacity: 1;
+}
+
+.howard-zoom-overlay.howard-zoom-dismissing {
+  opacity: 0;
+}
+
+.howard-zoom-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.howard-zoom-content {
+  position: relative;
+  overflow: visible;
+}
+
+.howard-zoom-panel {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+  border: 2px solid rgba(183, 148, 244, 0.6);
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(128, 90, 213, 0.4);
+}
+
+.howard-pres-undo-btn {
+  background: var(--s2-panel2);
+  border-color: var(--s2-stroke);
+  color: var(--s2-muted);
+}
+
+.howard-pres-undo-btn:hover:not(.howard-btn-disabled) {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+.howard-btn-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.howard-pres-notes-btn {
+  margin-left: auto;
+  background: var(--s2-panel2);
+  border-color: #b7791f;
+  color: #ecc94b;
+}
+
+.howard-pres-notes-btn:hover {
+  background: #b7791f;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(183, 121, 31, 0.5);
+}
+
+.howard-editor-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  outline: none;
+}
+
+/* --- Left: Page Strip --- */
+
+.howard-page-strip {
+  display: flex;
+  flex-direction: column;
+  width: 44px;
+  flex-shrink: 0;
+  background: var(--s2-panel);
+  border-right: 1px solid var(--s2-stroke);
+  overflow-y: auto;
+}
+
+.howard-page-strip-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0;
+  gap: 2px;
+  border-bottom: 1px solid var(--s2-stroke);
+}
+
+.howard-page-strip-btn {
+  width: 30px;
+  height: 24px;
+  border: 1px solid var(--s2-stroke);
+  border-radius: 3px;
+  background: var(--s2-panel2);
+  color: var(--s2-text);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.howard-page-strip-btn:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+.howard-page-strip-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.howard-page-strip-item {
+  width: 30px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--s2-text);
+  font-size: 13px;
+  font-family: var(--s2-font);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.howard-page-strip-item:hover {
+  background: var(--s2-panel2);
+  color: var(--s2-text);
+}
+
+.howard-page-strip-item.active {
+  background: var(--s2-accent);
+  color: #fff;
+  border-color: var(--s2-accent);
+  box-shadow: 0 0 6px var(--s2-accent-glow);
+}
+
+/* Hidden page indicator (GM only — red text, right-click to toggle) */
+.howard-page-strip-item.howard-page-hidden {
+  color: #e53e3e !important;
+  opacity: 0.8;
+}
+
+.howard-page-strip-item.howard-page-hidden.active {
+  color: #fc8181 !important;
+  opacity: 1;
+}
+
+/* --- Center: Comic Display --- */
+
+.howard-comic-display {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--s2-bg0);
+}
+
+.howard-comic-display .howard-page-indicator {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: var(--s2-text);
+  font-family: var(--s2-font);
+  pointer-events: none;
+}
+
+/* --- Right: GM/Forge Panel --- */
+
+.howard-right-panel {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--s2-panel);
+  border-left: 1px solid var(--s2-stroke);
+  overflow: hidden;
+}
+
+.howard-mode-toggle {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 2px solid var(--s2-stroke);
+}
+
+.howard-mode-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: var(--s2-panel2);
+  color: var(--s2-text);
+  font-family: var(--s2-font);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-mode-btn:hover {
+  color: var(--s2-text);
+  background: var(--s2-bg1);
+}
+
+.howard-mode-btn.active {
+  color: var(--s2-accent);
+  background: var(--s2-bg0);
+  border-bottom: 2px solid var(--s2-accent);
+  margin-bottom: -2px;
+}
+
+.howard-gm-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  gap: 8px;
+}
+
+.howard-gm-section {
+  background: var(--s2-panel2);
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  padding: 8px;
+}
+
+.howard-gm-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--s2-accent);
+}
+
+.howard-gm-section-header i {
+  font-size: 12px;
+}
+
+.howard-gm-section-label {
+  white-space: nowrap;
+}
+
+.howard-gm-fight-scene {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+.howard-gm-fight-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--s2-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.howard-fight-scene-select {
+  flex: 1;
+  font-size: 11px;
+  padding: 2px 4px;
+  background: var(--s2-panel2);
+  color: var(--s2-text);
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+}
+
+.howard-enemy-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--s2-bg0);
+  border: 1px solid var(--s2-stroke);
+  border-radius: 3px;
+  color: var(--s2-text);
+  padding: 3px 6px;
+  font-size: 11px;
+  font-family: var(--s2-font);
+}
+
+.howard-enemy-add-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--s2-stroke);
+  border-radius: 3px;
+  background: var(--s2-panel);
+  color: var(--s2-text);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.howard-enemy-add-btn:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+.howard-enemy-drop-zone {
+  min-height: 30px;
+  border: 1px dashed var(--s2-stroke);
+  border-radius: 3px;
+  padding: 4px;
+}
+
+.howard-enemy-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 0;
+  min-height: 24px;
+}
+
+.howard-enemy-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--s2-bg0);
+  border: 1px solid var(--s2-stroke);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 10px;
+  color: var(--s2-text);
+  white-space: nowrap;
+}
+
+.howard-enemy-tag-img {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  object-fit: cover;
+  margin: -1px 0;
+}
+
+.howard-enemy-tag-linked {
+  border-color: #c8a84e;
+  cursor: grab;
+}
+
+.howard-enemy-tag-linked:active {
+  cursor: grabbing;
+}
+
+.howard-enemy-tag-link {
+  cursor: pointer;
+  color: #c8a84e;
+}
+
+.howard-enemy-tag-link:hover {
+  text-decoration: underline;
+}
+
+.howard-enemy-tag-x {
+  background: none;
+  border: none;
+  color: var(--s2-text);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.4;
+  transition: opacity 0.15s ease;
+}
+
+.howard-enemy-tag:hover .howard-enemy-tag-x {
+  opacity: 1;
+}
+
+.howard-enemy-tag-x:hover {
+  color: #fc8181;
+}
+
+.howard-enemy-tags.howard-enemy-drop-highlight {
+  outline: 2px dashed var(--s2-accent);
+  outline-offset: -2px;
+  background: rgba(255, 60, 60, 0.08);
+}
+
+.howard-check-icon-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.howard-check-icon {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(42, 34, 16, 0.9);
+  border: 2px solid #c8a84e;
+  border-radius: 50%;
+  color: #FFD700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 0 8px rgba(200, 168, 78, 0.4);
+}
+
+.howard-check-icon:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 14px rgba(200, 168, 78, 0.7);
+}
+
+.howard-check-icon-fired {
+  opacity: 0.35;
+  background: rgba(80, 80, 80, 0.7);
+  border-color: rgba(120, 120, 120, 0.5);
+  box-shadow: none;
+}
+
+.howard-check-add-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--s2-stroke);
+  border-radius: 3px;
+  background: var(--s2-panel);
+  color: var(--s2-text);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+.howard-check-add-btn:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+/* ---- Check Markers on Comic Page (GM only) ---- */
+
+.howard-check-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 70;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(42, 34, 16, 0.9);
+  border: 2px solid #c8a84e;
+  border-radius: 50%;
+  color: #FFD700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 0 8px rgba(200, 168, 78, 0.4);
+  pointer-events: auto;
+}
+
+.howard-check-marker:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 0 14px rgba(200, 168, 78, 0.7);
+}
+
+.howard-check-marker.howard-check-fired {
+  opacity: 0.35;
+  background: rgba(80, 80, 80, 0.7);
+  border-color: rgba(120, 120, 120, 0.5);
+  box-shadow: none;
+}
+
+.howard-check-marker.howard-check-fired:hover {
+  opacity: 0.6;
+}
+
+.howard-check-marker.howard-check-highlight {
+  outline: 2px solid var(--s2-accent);
+  outline-offset: 2px;
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow: 0 0 16px rgba(200, 168, 78, 0.8);
+}
+
+.howard-check-marker.howard-check-moving {
+  pointer-events: auto !important;
+  cursor: grab;
+  outline: 2px solid #3498db;
+  z-index: 200 !important;
+}
+
+.howard-check-marker.howard-check-moving:active {
+  cursor: grabbing;
+}
+
+.howard-page.howard-check-placing {
+  cursor: crosshair !important;
+}
+
+.howard-page.howard-check-placing * {
+  cursor: crosshair !important;
+  pointer-events: none !important;
+}
+
+.howard-check-marker.howard-check-moving {
+  pointer-events: auto !important;
+}
+
+/* ---- Check Inline Edit View (GM Panel) ---- */
+
+.howard-check-edit-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0;
+  flex: 1;
+}
+
+.howard-check-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.howard-check-edit-fields label {
+  font-size: 11px;
+  color: var(--s2-text);
+  font-family: var(--s2-font);
+}
+
+.howard-check-edit-fields input,
+.howard-check-edit-fields textarea {
+  background: var(--s2-bg0);
+  border: 1px solid var(--s2-stroke);
+  border-radius: 3px;
+  color: var(--s2-text);
+  padding: 3px 6px;
+  font-size: 11px;
+  font-family: var(--s2-font);
+}
+
+.howard-check-edit-fields textarea {
+  resize: vertical;
+  min-height: 50px;
+  line-height: 1.4;
+}
+
+.howard-check-edit-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.howard-check-edit-actions button {
+  flex: 1;
+  font-size: 10px;
+}
+
+.howard-check-edit-delete {
+  color: #fc8181 !important;
+  border-color: rgba(252, 129, 129, 0.4) !important;
+}
+
+.howard-check-edit-delete:hover {
+  background: rgba(252, 129, 129, 0.15) !important;
+}
+
+.howard-gm-notes {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.howard-notes-title {
+  flex: 1;
+  min-width: 0;
+  background: var(--s2-bg0);
+  border: 1px solid var(--s2-stroke);
+  border-radius: 3px;
+  color: var(--s2-text);
+  padding: 3px 6px;
+  font-size: 11px;
+  font-family: var(--s2-font);
+}
+
+.howard-notes-text {
+  flex: 1;
+  min-height: 120px;
+  background: var(--s2-bg0);
+  border: 1px solid var(--s2-stroke);
+  border-radius: 3px;
+  color: var(--s2-text);
+  padding: 6px;
+  font-size: 11px;
+  font-family: var(--s2-font);
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.howard-forge-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.howard-forge-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid var(--s2-stroke);
+  flex-shrink: 0;
+}
+
+.howard-forge-tool-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  background: var(--s2-panel2);
+  color: var(--s2-text);
+  font-size: 10px;
+  font-family: var(--s2-font);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-forge-tool-btn i {
+  font-size: 14px;
+}
+
+.howard-forge-tool-btn:hover {
+  color: var(--s2-text);
+  background: var(--s2-bg1);
+}
+
+.howard-forge-tool-btn.active {
+  color: var(--s2-accent);
+  border-color: var(--s2-accent);
+  background: var(--s2-bg0);
+  box-shadow: 0 0 6px var(--s2-accent-glow);
+}
+
+.howard-dynamic-editor {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+/* --- Freeform Panels on Comic Display --- */
+
+.howard-page-content {
+  position: relative;
+}
+
+.howard-panel.howard-panel-freeform {
+  position: absolute;
+  background: var(--s2-bg1);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.howard-panel.howard-panel-freeform.howard-panel-transparent {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.howard-panel.howard-panel-freeform > .howard-layer-image {
+  position: absolute;
+  width: 100%;
+  height: auto;
+  max-width: none !important;
+  max-height: none !important;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  border: 0;
+  outline: 0;
+}
+
+.howard-panel-freeform .howard-panel-inner {
+  position: relative;
+  z-index: 50;
+  padding: 8px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.howard-panel-freeform .howard-panel-content {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--s2-text);
+}
+
+/* --- Page-Level Image Layers (on comic display) --- */
+
+.howard-page-layer-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  border: 0;
+  outline: 0;
+  backface-visibility: hidden;
+}
+
+/* --- Forge: Card Grid (shared by PAGE, PANEL, etc.) --- */
+
+.howard-forge-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.howard-forge-card {
+  background: var(--s2-bg0);
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.howard-forge-card-thumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--s2-panel2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.howard-forge-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.howard-forge-card-thumb:hover {
+  opacity: 0.8;
+}
+
+.howard-forge-card-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-top: 1px solid var(--s2-stroke);
+}
+
+.howard-forge-card-layer {
+  background: var(--s2-accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--s2-font);
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.howard-forge-card-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--s2-text);
+  font-size: 10px;
+  width: 22px;
+  height: 20px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+
+.howard-forge-card-btn:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+.howard-forge-card-btn.howard-image-delete:hover {
+  border-color: #fc8181;
+  color: #fc8181;
+}
+
+.howard-forge-card-btn.howard-image-move.active,
+.howard-forge-card-btn.howard-panel-move.active {
+  color: var(--s2-accent);
+  border-color: var(--s2-accent);
+  background: rgba(255, 60, 60, 0.15);
+}
+
+/* --- PAGE Tool Lock Card --- */
+
+.howard-page-lock-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-height: 80px;
+  border: 2px dashed var(--s2-stroke);
+  transition: all 0.15s ease;
+}
+
+.howard-page-lock-card i {
+  font-size: 32px;
+  color: var(--s2-muted);
+  transition: all 0.15s ease;
+}
+
+.howard-page-lock-card:hover i {
+  color: var(--s2-text);
+}
+
+.howard-page-lock-card.locked {
+  border-color: var(--s2-accent);
+  background: rgba(255, 60, 60, 0.08);
+}
+
+.howard-page-lock-card.locked i {
+  color: var(--s2-accent);
+}
+
+.howard-forge-card-grid.howard-page-locked .howard-forge-card:not(.howard-page-lock-card) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.howard-forge-add-btn.howard-btn-locked {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.howard-forge-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  background: var(--s2-panel2);
+  color: var(--s2-text);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-forge-back-btn:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+.howard-page-layer-image.howard-image-moveable {
+  outline: 2px dashed var(--s2-accent);
+  outline-offset: -2px;
+  z-index: 999 !important;
+}
+
+.howard-forge-card-controls .howard-image-delete,
+.howard-forge-card-controls .howard-pimg-inline-delete {
+  margin-left: auto;
+}
+
+/* --- Forge: Add Button --- */
+
+.howard-forge-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px;
+  border: 1px dashed var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  background: var(--s2-panel2);
+  color: var(--s2-text);
+  font-size: 12px;
+  font-family: var(--s2-font);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-forge-add-btn:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+/* --- PANEL Tool: Single-column card list --- */
+
+.howard-forge-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.howard-forge-panel-card {
+  display: flex;
+  align-items: stretch;
+  background: var(--s2-bg0);
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  overflow: hidden;
+}
+
+.howard-forge-panel-card-preview {
+  width: 60px;
+  flex-shrink: 0;
+  background: var(--s2-panel2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-right: 1px solid var(--s2-stroke);
+}
+
+.howard-forge-panel-card-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.howard-forge-panel-card-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 6px;
+}
+
+.howard-forge-panel-card-body .howard-panel-delete {
+  margin-left: auto;
+}
+
+/* --- PANEL Tool Lock Card --- */
+
+.howard-panel-lock-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border: 2px dashed var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-panel-lock-card i {
+  font-size: 28px;
+  color: var(--s2-muted);
+  transition: all 0.15s ease;
+}
+
+.howard-panel-lock-card:hover i {
+  color: var(--s2-text);
+}
+
+.howard-panel-lock-card.locked {
+  border-color: var(--s2-accent);
+  background: rgba(255, 60, 60, 0.08);
+}
+
+.howard-panel-lock-card.locked i {
+  color: var(--s2-accent);
+}
+
+.howard-forge-panel-list.howard-panel-locked .howard-forge-panel-card:not(.howard-panel-lock-card) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.howard-forge-panel-list.howard-panel-locked + .howard-draw-panel {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* --- TEXT Tool: Text Block Cards --- */
+
+.howard-forge-text-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.howard-forge-text-card {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  background: var(--s2-panel);
+  min-height: 36px;
+  overflow: hidden;
+}
+
+.howard-forge-text-card-preview {
+  flex: 0 0 80px;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: var(--s2-muted);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-right: 1px solid var(--s2-stroke);
+}
+
+.howard-forge-text-card-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 6px;
+}
+
+.howard-forge-text-card-body .howard-text-delete {
+  margin-left: auto;
+}
+
+.howard-forge-card-btn.howard-text-delete:hover {
+  border-color: #fc8181;
+  color: #fc8181;
+}
+
+.howard-forge-card-btn.howard-text-edit:hover {
+  border-color: #63b3ed;
+  color: #63b3ed;
+}
+
+/* --- TEXT Tool Lock Card --- */
+
+.howard-text-lock-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  border: 2px dashed var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-text-lock-card i {
+  font-size: 24px;
+  color: var(--s2-muted);
+  transition: all 0.15s ease;
+}
+
+.howard-text-lock-card:hover i {
+  color: var(--s2-text);
+}
+
+.howard-text-lock-card.locked {
+  border-color: var(--s2-accent);
+  background: rgba(255, 60, 60, 0.08);
+}
+
+.howard-text-lock-card.locked i {
+  color: var(--s2-accent);
+}
+
+.howard-forge-text-list.howard-text-locked .howard-forge-text-card:not(.howard-text-lock-card) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.howard-forge-text-list.howard-text-locked + .howard-draw-text {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* --- TEXT Tool Inline Editor --- */
+
+.howard-text-edit-area {
+  width: 100%;
+  min-height: 120px;
+  padding: 8px;
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  background: var(--s2-bg0);
+  color: var(--s2-text);
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+  margin-bottom: 6px;
+}
+
+.howard-text-edit-area:focus {
+  outline: none;
+  border-color: var(--s2-accent);
+  box-shadow: 0 0 6px var(--s2-accent-glow);
+}
+
+/* --- Text Block on Comic Display (freeform — drawn boxes) --- */
+
+.howard-text-block.howard-text-freeform {
+  position: absolute;
+  overflow: hidden;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  transform: none;
+  width: auto;
+  max-width: none;
+  white-space: normal;
+  pointer-events: auto;
+  background: #000;
+}
+
+.howard-text-block.howard-text-freeform .howard-text-block-content {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #fff;
+  background: none;
+  border: none;
+}
+
+.howard-text-freeform.howard-text-highlight {
+  outline: 2px solid var(--s2-accent);
+  outline-offset: -1px;
+}
+
+.howard-text-freeform.howard-tb-transparent {
+  background: transparent;
+}
+.howard-tb-transparent .howard-text-block-content {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.howard-forge-card-btn.howard-panel-transparent-toggle.active,
+.howard-forge-card-btn.howard-text-transparent-toggle.active {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+  background: rgba(99, 179, 237, 0.15);
+}
+
+.howard-forge-card-btn.howard-panel-images:hover {
+  border-color: #63b3ed;
+  color: #63b3ed;
+}
+
+.howard-forge-card-btn.howard-panel-delete:hover {
+  border-color: #fc8181;
+  color: #fc8181;
+}
+
+.howard-comic-display.howard-draw-mode {
+  cursor: crosshair;
+}
+
+.howard-comic-display.howard-draw-mode .howard-panel-freeform,
+.howard-comic-display.howard-draw-mode .howard-page-layer-image,
+.howard-comic-display.howard-draw-mode .howard-text-freeform,
+.howard-comic-display.howard-draw-mode .howard-speech-freeform {
+  pointer-events: none !important;
+}
+
+.howard-comic-display.howard-aim-mode {
+  cursor: crosshair;
+}
+
+.howard-comic-display.howard-aim-mode .howard-panel-freeform,
+.howard-comic-display.howard-aim-mode .howard-page-layer-image,
+.howard-comic-display.howard-aim-mode .howard-text-freeform,
+.howard-comic-display.howard-aim-mode .howard-speech-freeform {
+  pointer-events: none !important;
+}
+
+.howard-comic-display .howard-page {
+  overflow: visible;
+}
+
+.howard-draw-overlay {
+  position: absolute;
+  border: 2px dashed var(--s2-accent);
+  background: rgba(255, 60, 60, 0.1);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.howard-panel-freeform.howard-panel-highlight {
+  outline: 2px solid var(--s2-accent);
+  outline-offset: -1px;
+}
+
+/* --- SVG Tail Layer (page-level, behind all speech bubbles) --- */
+
+.howard-speech-tail-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* --- Speech Bubble on Comic Display (freeform — drawn boxes) --- */
+
+.howard-speech-bubble.howard-speech-freeform {
+  position: absolute;
+  overflow: visible;
+  border-radius: 14px;
+  border: 2px solid #333;
+  background: #fff;
+  padding: 8px 14px;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+.howard-speech-bubble.howard-speech-freeform .howard-speech-bubble-content {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  color: #000;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.howard-speech-freeform.howard-speech-highlight {
+  outline: 2px solid var(--s2-accent);
+  outline-offset: 2px;
+}
+
+.howard-speech-freeform.howard-speech-moving {
+  pointer-events: auto !important;
+  cursor: grab;
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+  z-index: 200 !important;
+}
+
+/* --- SPEECH Tool: Speech Card List --- */
+
+.howard-forge-speech-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.howard-forge-speech-card {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  background: var(--s2-panel);
+  min-height: 36px;
+  overflow: hidden;
+}
+
+.howard-forge-speech-card-preview {
+  flex: 0 0 80px;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: var(--s2-muted);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-right: 1px solid var(--s2-stroke);
+}
+
+.howard-forge-speech-card-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 6px;
+}
+
+.howard-forge-speech-card-body .howard-speech-delete {
+  margin-left: auto;
+}
+
+.howard-forge-card-btn.howard-speech-delete:hover {
+  border-color: #fc8181;
+  color: #fc8181;
+}
+
+.howard-forge-card-btn.howard-speech-edit:hover {
+  border-color: #63b3ed;
+  color: #63b3ed;
+}
+
+.howard-forge-card-btn.howard-speech-aim:hover {
+  border-color: #68d391;
+  color: #68d391;
+}
+
+/* --- SPEECH Tool Lock Card --- */
+
+.howard-speech-lock-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  border: 2px dashed var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-speech-lock-card i {
+  font-size: 24px;
+  color: var(--s2-muted);
+  transition: all 0.15s ease;
+}
+
+.howard-speech-lock-card:hover i {
+  color: var(--s2-text);
+}
+
+.howard-speech-lock-card.locked {
+  border-color: var(--s2-accent);
+  background: rgba(255, 60, 60, 0.08);
+}
+
+.howard-speech-lock-card.locked i {
+  color: var(--s2-accent);
+}
+
+.howard-forge-speech-list.howard-speech-locked .howard-forge-speech-card:not(.howard-speech-lock-card) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.howard-forge-speech-list.howard-speech-locked + .howard-draw-speech {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* --- SPEECH Tool Inline Editor --- */
+
+.howard-speech-edit-area {
+  width: 100%;
+  min-height: 120px;
+  padding: 8px;
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  background: var(--s2-bg0);
+  color: var(--s2-text);
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+  margin-bottom: 6px;
+}
+
+.howard-speech-edit-area:focus {
+  outline: none;
+  border-color: var(--s2-accent);
+  box-shadow: 0 0 6px var(--s2-accent-glow);
+}
+
+/* --- Panel Image Dialog (mini PAGE tool inside dialog) --- */
+
+.howard-pimg-dialog {
+  padding: 4px;
+}
+
+.howard-pimg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.howard-pimg-card {
+  background: var(--s2-bg0);
+  border: 1px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.howard-pimg-thumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--s2-panel2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.howard-pimg-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.howard-pimg-thumb:hover {
+  opacity: 0.8;
+}
+
+.howard-pimg-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-top: 1px solid var(--s2-stroke);
+}
+
+.howard-pimg-controls .howard-pimg-delete {
+  margin-left: auto;
+}
+
+.howard-pimg-controls .howard-pimg-delete:hover {
+  border-color: #fc8181;
+  color: #fc8181;
+}
+
+.howard-forge-add-btn.active {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+  border-style: solid;
+}
+
+/* --- Forge: Empty state --- */
+
+.howard-forge-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--s2-muted);
+  font-size: 12px;
+  font-family: var(--s2-font);
+}
+
+/* HOWARD - END FULL SCREEN EDITOR LAYOUT       */
+
+.howard-page-back-btn {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 200;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--s2-accent);
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--s2-accent);
+  font-size: 12px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.howard-page-back-btn:hover {
+  background: rgba(0, 0, 0, 1);
+  box-shadow: 0 0 6px var(--s2-accent-glow);
+}
+
+.howard-title {
+  text-align: left;
+}
+
+.howard-title h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--s2-text);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.howard-subtitle {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--s2-accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.howard-header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.howard-viewer-bar {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  z-index: 150;
+}
+
+.howard-reader-editing .howard-viewer-bar {
+  display: none;
+}
+
+.howard-vbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--s2-stroke);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--s2-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.howard-vbar-btn:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+.howard-vbar-btn.howard-open-btn {
+  border-color: #3182ce;
+  color: #3182ce;
+}
+
+.howard-vbar-btn.howard-open-btn:hover {
+  background: rgba(49, 130, 206, 0.15);
+  color: #63b3ed;
+}
+
+.howard-vbar-btn.howard-showhide-btn.active {
+  box-shadow: 0 0 6px rgba(72, 187, 120, 0.4);
+  border-color: #48bb78;
+  color: #48bb78;
+  background: rgba(56, 161, 105, 0.2);
+}
+
+.howard-hide-mode .howard-vbar-btn.howard-showhide-btn.active {
+  box-shadow: 0 0 6px rgba(229, 62, 62, 0.4);
+  border-color: #e53e3e;
+  color: #e53e3e;
+  background: rgba(229, 62, 62, 0.2);
+}
+
+.howard-vbar-btn.howard-close-all-btn:hover {
+  border-color: #e53e3e;
+  color: #e53e3e;
+  font-size: 10px;
+}
+
+.howard-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--s2-panel);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-muted);
+  font-family: var(--s2-font);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.howard-header-btn:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+.howard-header-btn.howard-delete-tale-btn:hover {
+  border-color: #e53e3e;
+  color: #e53e3e;
+}
+
+.howard-panel-unrevealed {
+  position: relative;
+}
+
+.howard-panel-unrevealed > * {
+  visibility: hidden !important;
+}
+
+.howard-panel-unrevealed::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #0a0a0a;
+  z-index: 100;
+  border-radius: inherit;
+}
+
+.howard-tb-unrevealed {
+  display: none !important;
+}
+
+.howard-show-mode .howard-panel,
+.howard-hide-mode .howard-panel {
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.howard-show-mode .howard-panel:hover {
+  box-shadow: inset 0 0 0 2px rgba(72, 187, 120, 0.6);
+}
+
+.howard-hide-mode .howard-panel:hover {
+  box-shadow: inset 0 0 0 2px rgba(229, 62, 62, 0.6);
+}
+
+.howard-show-mode .howard-panel-revealed,
+.howard-hide-mode .howard-panel-revealed {
+  box-shadow: inset 0 0 0 2px rgba(72, 187, 120, 0.5);
+}
+
+.howard-show-mode .howard-panel-revealed::before,
+.howard-hide-mode .howard-panel-revealed::before {
+  content: '\f06e'; /* fa-eye */
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 10px;
+  color: #48bb78;
+  z-index: 120;
+  background: rgba(0, 0, 0, 0.6);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.howard-show-mode .howard-panel:not(.howard-panel-revealed)::before,
+.howard-hide-mode .howard-panel:not(.howard-panel-revealed)::before {
+  content: '\f070'; /* fa-eye-slash */
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 10px;
+  color: #e53e3e;
+  z-index: 120;
+  background: rgba(0, 0, 0, 0.6);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.howard-show-mode .howard-text-block,
+.howard-hide-mode .howard-text-block {
+  pointer-events: auto !important;
+  cursor: pointer;
+}
+
+.howard-show-mode .howard-text-block:not(.howard-tb-revealed),
+.howard-hide-mode .howard-text-block:not(.howard-tb-revealed) {
+  opacity: 0.4;
+  outline: 2px dashed #e53e3e;
+  outline-offset: 2px;
+}
+
+.howard-show-mode .howard-tb-revealed,
+.howard-hide-mode .howard-tb-revealed {
+  outline: 2px solid #48bb78;
+  outline-offset: 2px;
+}
+
+/* HOWARD - SKILL CHECK MARKERS                 */
+
+.howard-skill-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 70;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(42, 34, 16, 0.9);
+  border: 2px solid #c8a84e;
+  border-radius: 50%;
+  color: #FFD700;
+  font-size: 14px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 8px rgba(200, 168, 78, 0.4);
+}
+
+.howard-skill-marker:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 0 14px rgba(200, 168, 78, 0.7);
+}
+
+.howard-skill-marker.howard-sm-fired {
+  opacity: 0.35;
+  background: rgba(80, 80, 80, 0.7);
+  border-color: rgba(120, 120, 120, 0.5);
+  box-shadow: none;
+}
+
+.howard-skill-marker.howard-sm-fired:hover {
+  opacity: 0.6;
+}
+
+.howard-reader-editing .howard-skill-marker {
+  pointer-events: none;
+}
+
+.howard-skill-marker.howard-sm-moving {
+  pointer-events: auto !important;
+  cursor: grab;
+  outline: 2px solid #3498db;
+  z-index: 200 !important;
+}
+
+.howard-skill-marker.howard-sm-moving:active {
+  cursor: grabbing;
+}
+
+.howard-page.howard-sm-placing {
+  cursor: crosshair !important;
+}
+
+.howard-page.howard-sm-placing * {
+  cursor: crosshair !important;
+}
+
+.howard-lgrid-card .howard-sm-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 100%;
+  text-align: center;
+  padding: 6px;
+}
+
+.howard-sm-preview i {
+  font-size: 20px;
+  color: #c8a84e;
+}
+
+.howard-sm-preview .howard-sm-label {
+  font-size: 10px;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.howard-sm-add-thumb {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+}
+
+.howard-sm-skill-input,
+.howard-sm-dc-input {
+  background: var(--s2-bg0);
+  border: 1px solid var(--s2-border);
+  color: #fff;
+  font-family: var(--s2-font);
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  width: 100%;
+}
+
+.howard-sm-dc-input {
+  width: 50px;
+}
+
+.howard-sm-prompt-input {
+  width: 100%;
+  flex: 1;
+  resize: none;
+  background: var(--s2-bg0);
+  border: 1px solid var(--s2-border);
+  color: #fff;
+  font-family: var(--s2-font);
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 3px;
+}
+
+.howard-sm-publish-small {
+  font-size: 10px !important;
+  padding: 3px 10px !important;
+}
+
+.howard-sm-card-fired .howard-lgrid-thumb {
+  opacity: 0.4;
+  border-color: rgba(120, 120, 120, 0.5);
+}
+
+.howard-sm-card-fired .howard-sm-preview i {
+  color: #888;
+}
+
+.howard-sm-reset-active .howard-sm-card-fired .howard-lgrid-thumb {
+  opacity: 0.8;
+  border-color: #c8a84e;
+  cursor: pointer;
+}
+
+.howard-sm-reset-active .howard-lgrid-card:not(.howard-sm-card-fired) {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.howard-sm-reset-active .howard-lgrid-add-card {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.howard-sm-reset-btn.active {
+  background: rgba(200, 168, 78, 0.3) !important;
+  border-color: #c8a84e !important;
+  color: #FFD700 !important;
+}
+
+/* ---- GM Notes Page Indicator ---- */
+
+.howard-gm-notes-indicator {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 60;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(42, 34, 16, 0.9);
+  border: 2px solid #c8a84e;
+  border-radius: 4px;
+  color: #FFD700;
+  font-size: 12px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 6px rgba(200, 168, 78, 0.3);
+}
+
+.howard-gm-notes-indicator:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 10px rgba(200, 168, 78, 0.6);
+}
+
+.howard-gm-notes-indicator.howard-gm-notes-empty {
+  opacity: 0.3;
+  border-color: rgba(120, 120, 120, 0.5);
+  box-shadow: none;
+}
+
+.howard-gm-notes-indicator.howard-gm-notes-empty:hover {
+  opacity: 0.6;
+}
+
+/* ---- GM Notes Dialog ---- */
+
+.howard-gmn-window .dialog-buttons {
+  display: none;
+}
+
+.howard-gmn-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.howard-gmn-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.howard-gmn-row label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #c8a84e;
+  letter-spacing: 0.5px;
+}
+
+.howard-gmn-row input[type="text"],
+.howard-gmn-row textarea,
+.howard-gmn-row select {
+  background: var(--s2-bg0, #1a1a2e);
+  border: 1px solid var(--s2-border, #444);
+  color: #fff;
+  font-family: var(--s2-font, inherit);
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: 3px;
+}
+
+.howard-gmn-row textarea {
+  resize: vertical;
+}
+
+.howard-gmn-scene-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.howard-gmn-scene-select {
+  flex: 1;
+}
+
+.howard-gmn-scene-activate {
+  background: rgba(42, 34, 16, 0.9);
+  border: 1px solid #c8a84e;
+  color: #FFD700;
+  padding: 3px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.howard-gmn-scene-activate:hover {
+  background: rgba(200, 168, 78, 0.2);
+}
+
+.howard-gmn-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 20px;
+}
+
+.howard-gmn-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(200, 168, 78, 0.15);
+  border: 1px solid rgba(200, 168, 78, 0.4);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: #ddd;
+}
+
+.howard-gmn-tag-x {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.howard-gmn-tag-x:hover {
+  color: #e74c3c;
+}
+
+.howard-gmn-tag-linked {
+  border-color: rgba(200, 168, 78, 0.7);
+  background: rgba(200, 168, 78, 0.25);
+  cursor: grab;
+}
+
+.howard-gmn-tag-link {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.howard-gmn-tag-link:hover {
+  color: #FFD700;
+}
+
+.howard-gmn-drop-hover {
+  outline: 2px dashed #c8a84e;
+  outline-offset: 2px;
+  background: rgba(200, 168, 78, 0.1);
+  border-radius: 4px;
+}
+
+.howard-gmn-add-row {
+  display: flex;
+  gap: 4px;
+}
+
+.howard-gmn-add-row input {
+  flex: 1;
+  background: var(--s2-bg0, #1a1a2e);
+  border: 1px solid var(--s2-border, #444);
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 3px;
+}
+
+.howard-gmn-add-btn {
+  background: rgba(42, 34, 16, 0.9);
+  border: 1px solid #c8a84e;
+  color: #FFD700;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.howard-gmn-add-btn:hover {
+  background: rgba(200, 168, 78, 0.2);
+}
+
+.howard-gmn-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(200, 168, 78, 0.2);
+}
+
+.howard-gmn-footer button {
+  background: rgba(42, 34, 16, 0.9);
+  border: 1px solid #c8a84e;
+  color: #c8a84e;
+  padding: 4px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.howard-gmn-footer button:hover {
+  background: rgba(200, 168, 78, 0.2);
+}
+
+.howard-gmn-expand-btn {
+  margin-right: auto;
+}
+
+/* ---- Read-Only GM Notes (play mode) ---- */
+
+.howard-gmn-ro-window .dialog-buttons {
+  display: none;
+}
+
+.howard-gmn-readonly {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.howard-gmn-ro-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #FFD700;
+  border-bottom: 1px solid rgba(200, 168, 78, 0.3);
+  padding-bottom: 6px;
+}
+
+.howard-gmn-ro-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.howard-gmn-ro-row > label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #c8a84e;
+  letter-spacing: 0.5px;
+}
+
+.howard-gmn-ro-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(200, 168, 78, 0.25);
+}
+
+.howard-gmn-ro-scene {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ddd;
+  font-size: 12px;
+}
+
+.howard-gmn-scene-go {
+  background: rgba(42, 34, 16, 0.9);
+  border: 1px solid #c8a84e;
+  color: #FFD700;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.howard-gmn-scene-go:hover {
+  background: rgba(200, 168, 78, 0.2);
+}
+
+.howard-gmn-ro-notes {
+  color: #ddd;
+  font-size: 15px;
+  line-height: 1.6;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(200, 168, 78, 0.15);
+  border-radius: 3px;
+  padding: 8px 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* ---- Expanded Notes Dialog ---- */
+
+.howard-gmn-expand-window .dialog-buttons {
+  display: none;
+}
+
+.howard-gmn-expand-window .window-content {
+  padding: 8px;
+}
+
+.howard-gmn-expand-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 8px;
+}
+
+.howard-gmn-expand-textarea {
+  flex: 1;
+  min-height: 200px;
+  background: var(--s2-bg0, #1a1a2e);
+  border: 1px solid var(--s2-border, #444);
+  color: #fff;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  border-radius: 3px;
+  resize: none;
+  font-family: inherit;
+}
+
+.howard-gmn-expand-textarea:focus {
+  outline: none;
+  border-color: #c8a84e;
+}
+
+.howard-gmn-expand-dialog .howard-gmn-footer {
+  flex-shrink: 0;
+}
+
+.howard-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background:
+    radial-gradient(ellipse at center, rgba(225,6,0,0.03) 0%, transparent 70%),
+    var(--s2-bg0);
+}
+
+.howard-blank-canvas {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.howard-placeholder {
+  text-align: center;
+  max-width: 500px;
+  padding: 40px;
+  background: var(--s2-panel);
+  border: 2px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-panel);
+  box-shadow: var(--s2-shadow-panel);
+}
+
+.howard-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  color: var(--s2-accent);
+  opacity: 0.6;
+}
+
+.howard-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.howard-placeholder h2 {
+  margin: 0 0 16px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--s2-text);
+  letter-spacing: 1px;
+}
+
+.howard-quote {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--s2-muted);
+  line-height: 1.6;
+}
+
+.howard-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--s2-muted);
+  line-height: 1.5;
+}
+
+.howard-rack-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.howard-rack-view-row {
+  padding: 8px 0 0;
+  text-align: center;
+}
+
+.howard-view-btn {
+  background: #38a169;
+  color: #fff;
+  border: none;
+  padding: 6px 32px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.howard-view-btn:hover {
+  background: #48bb78;
+  box-shadow: 0 0 8px rgba(72, 187, 120, 0.5);
+}
+
+.howard-footer {
+  background: var(--s2-bg1);
+  border-top: 1px solid var(--s2-stroke);
+  padding: 8px 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.howard-main-reader + .howard-footer {
+  display: none;
+  align-items: center;
+}
+
+.howard-footer-spacer {
+  flex: 1;
+}
+
+.howard-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* HOWARD - COMIC BOOK RACK                     */
+
+.howard-rack {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  outline: none;
+}
+
+.howard-rack-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.howard-rack-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr;
+  gap: 8px;
+  width: 100%;
+  height: 85%;
+  align-items: center;
+  padding: 0 12px;
+}
+
+/* --- Cover Cards --- */
+
+.howard-cover-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.howard-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--s2-radius-card);
+  overflow: hidden;
+  box-shadow: var(--s2-shadow-card);
+  cursor: pointer;
+  border: 2px solid var(--s2-stroke);
+}
+
+.howard-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+.howard-cover-slot.center {
+  z-index: 3;
+  transform: scale(1);
+  opacity: 1;
+}
+
+.howard-cover-slot.center .howard-cover {
+  border-color: var(--s2-accent);
+  box-shadow: var(--s2-shadow-card), 0 0 20px var(--s2-accent-glow);
+}
+
+.howard-cover-slot.left {
+  z-index: 1;
+  transform: scale(0.85);
+  opacity: 0.5;
+  justify-content: flex-end;
+}
+
+.howard-cover-slot.left .howard-cover {
+  margin-left: -50%;
+}
+
+.howard-cover-slot.right {
+  z-index: 1;
+  transform: scale(0.85);
+  opacity: 0.5;
+  justify-content: flex-start;
+}
+
+.howard-cover-slot.right .howard-cover {
+  margin-right: -50%;
+}
+
+.howard-cover-slot.left:hover,
+.howard-cover-slot.right:hover {
+  opacity: 0.75;
+  cursor: pointer;
+}
+
+/* --- Cover Overlay (issue # + title) --- */
+
+.howard-cover-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 12px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  border-radius: 0 0 var(--s2-radius-card) var(--s2-radius-card);
+}
+
+.howard-cover:hover .howard-cover-overlay {
+  opacity: 1;
+}
+
+.howard-cover-overlay .issue-number {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--s2-accent);
+  margin-bottom: 4px;
+}
+
+.howard-cover-overlay .issue-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--s2-text);
+  line-height: 1.3;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* --- Navigation Arrows --- */
+
+.howard-rack-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--s2-stroke-strong);
+  background: var(--s2-panel);
+  color: var(--s2-text);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.howard-rack-arrow:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+  opacity: 1;
+  box-shadow: 0 0 8px var(--s2-accent-glow);
+}
+
+.howard-rack-arrow-left {
+  left: 8px;
+}
+
+.howard-rack-arrow-right {
+  right: 8px;
+}
+
+/* --- Slide Animations --- */
+
+.howard-cover-slot.slide-in-from-left {
+  animation: rackSlideFromLeft 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.howard-cover-slot.slide-in-from-right {
+  animation: rackSlideFromRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes rackSlideFromLeft {
+  from { transform: translateX(-60px) scale(0.85); opacity: 0; }
+  to { transform: translateX(0); }
+}
+
+@keyframes rackSlideFromRight {
+  from { transform: translateX(60px) scale(0.85); opacity: 0; }
+  to { transform: translateX(0); }
+}
+
+/* --- Empty State --- */
+
+.howard-empty-state {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.howard-add-first-tale {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: var(--s2-accent);
+  border: none;
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-text);
+  font-family: var(--s2-font);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-add-first-tale:hover {
+  background: var(--s2-accent-hover);
+  box-shadow: 0 0 12px var(--s2-accent-glow);
+}
+
+.howard-rack-track.single-tale {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.howard-rack-track.single-tale .howard-cover-slot.center .howard-cover {
+  max-width: 280px;
+}
+
+.howard-rack-track.two-tales {
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  justify-items: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.howard-rack-track.two-tales .howard-cover-slot {
+  transform: scale(1);
+  opacity: 1;
+  overflow: visible;
+}
+
+.howard-rack-track.two-tales .howard-cover-slot .howard-cover {
+  margin: 0;
+  max-width: 200px;
+}
+
+/* --- Forge New Tale Dialog --- */
+
+.howard-dialog-window {
+  background: var(--s2-bg0) !important;
+  border: 3px solid var(--s2-stroke-strong) !important;
+  border-radius: var(--s2-radius-card) !important;
+}
+
+.howard-dialog-window .window-header {
+  background: var(--s2-panel) !important;
+  border-bottom: 3px solid var(--s2-accent) !important;
+  border-radius: 13px 13px 0 0 !important;
+}
+
+.howard-dialog-window .window-header .window-title {
+  color: var(--s2-text) !important;
+  font-family: var(--s2-font) !important;
+  font-weight: 700 !important;
+}
+
+.howard-dialog-window .window-content {
+  background: linear-gradient(180deg, var(--s2-bg1) 0%, var(--s2-bg0) 100%) !important;
+  padding: 16px !important;
+}
+
+.howard-dialog {
+  font-family: var(--s2-font);
+  color: var(--s2-text);
+}
+
+.howard-form-group {
+  margin-bottom: 14px;
+}
+
+.howard-form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--s2-muted);
+  margin-bottom: 6px;
+}
+
+.howard-form-group input[type="text"],
+.howard-form-group input[type="number"] {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--s2-bg0);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-text);
+  font-family: var(--s2-font);
+  font-size: 13px;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.howard-form-group input:focus {
+  outline: none;
+  border-color: var(--s2-accent);
+  box-shadow: 0 0 8px var(--s2-accent-glow);
+}
+
+.howard-cover-preview {
+  width: 120px;
+  height: 180px;
+  background: var(--s2-panel);
+  border: 2px dashed var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-top: 4px;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.howard-cover-preview:hover {
+  border-color: var(--s2-accent);
+}
+
+.howard-cover-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.howard-cover-preview .placeholder-icon {
+  color: var(--s2-muted);
+  font-size: 24px;
+}
+
+.howard-dialog-window .dialog-buttons {
+  background: var(--s2-panel) !important;
+  border-top: 2px solid var(--s2-stroke-strong) !important;
+  padding: 12px !important;
+}
+
+.howard-dialog-window .dialog-buttons button {
+  background: linear-gradient(180deg, var(--s2-panel2) 0%, var(--s2-bg0) 100%) !important;
+  border: 2px solid var(--s2-stroke-strong) !important;
+  border-radius: var(--s2-radius-small) !important;
+  color: var(--s2-text) !important;
+  font-family: var(--s2-font) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  padding: 8px 16px !important;
+  transition: all 0.15s ease !important;
+}
+
+.howard-dialog-window .dialog-buttons button:hover {
+  border-color: var(--s2-accent) !important;
+}
+
+/* --- Layer Grid Dialog --- */
+
+.howard-layers-window {
+  min-width: 380px !important;
+}
+
+.howard-lgrid-dialog {
+  font-family: var(--s2-font);
+  color: var(--s2-text);
+}
+
+.howard-lgrid-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.howard-lgrid-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.howard-lgrid-thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--s2-panel);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.howard-lgrid-thumb:hover {
+  border-color: var(--s2-accent);
+}
+
+.howard-lgrid-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.howard-lgrid-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #e74c3c;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.howard-lgrid-thumb:hover .howard-lgrid-delete {
+  opacity: 1;
+}
+
+.howard-lgrid-delete:hover {
+  color: #ff6b6b;
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.howard-lgrid-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ccc;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.howard-lgrid-num {
+  width: 42px !important;
+  padding: 2px 4px !important;
+  background: var(--s2-bg0) !important;
+  border: 2px solid var(--s2-stroke-strong) !important;
+  border-radius: 4px !important;
+  color: #fff !important;
+  font-family: var(--s2-font) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-align: center;
+}
+
+.howard-lgrid-num:focus {
+  outline: none;
+  border-color: var(--s2-accent) !important;
+}
+
+.howard-lgrid-add-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-style: dashed;
+  color: var(--s2-muted);
+  font-size: 24px;
+}
+
+.howard-lgrid-add-thumb:hover {
+  color: var(--s2-accent);
+  border-color: var(--s2-accent);
+}
+
+.howard-layers-window .dialog-buttons {
+  display: none;
+}
+
+.howard-lgrid-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.howard-lgrid-move-btn {
+  flex: 1;
+  padding: 6px 12px;
+  background: var(--s2-panel);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: #ccc;
+  font-family: var(--s2-font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-lgrid-move-btn:hover {
+  border-color: var(--s2-accent);
+  color: #fff;
+}
+
+.howard-lgrid-move-btn.active {
+  background: rgba(46, 204, 113, 0.15);
+  border-color: #2ecc71;
+  color: #2ecc71;
+}
+
+.howard-lgrid-done-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: var(--s2-panel);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: #ccc;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.howard-lgrid-done-btn:hover {
+  border-color: var(--s2-accent);
+  color: #fff;
+}
+
+.howard-lgrid-done-btn.howard-lgrid-cancel {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.howard-lgrid-done-btn.howard-lgrid-cancel:hover {
+  background: rgba(231, 76, 60, 0.15);
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
+.howard-lgrid-print-btn {
+  padding: 6px 12px;
+  background: var(--s2-panel);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: #ccc;
+  font-family: var(--s2-font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-lgrid-print-btn:hover {
+  border-color: var(--s2-accent);
+  color: #fff;
+}
+
+.howard-lgrid-card.selected .howard-lgrid-thumb {
+  border-color: #3498db;
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+}
+
+.howard-lgrid-move-active .howard-lgrid-add-card {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.howard-lgrid-move-active .howard-lgrid-delete {
+  display: none;
+}
+
+.howard-lgrid-move-active .howard-lgrid-num {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.howard-layer-moving {
+  pointer-events: auto !important;
+  cursor: grab;
+  outline: none;
+  z-index: 99 !important;
+}
+
+.howard-layer-moving:active {
+  cursor: grabbing;
+}
+
+/* HOWARD - COMIC BOOK READER                   */
+
+.howard-reader {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  outline: none;
+}
+
+.howard-reader-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.howard-page-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--s2-stroke-strong);
+  background: var(--s2-panel);
+  color: var(--s2-text);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.howard-page-arrow:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+  opacity: 1;
+  box-shadow: 0 0 8px var(--s2-accent-glow);
+}
+
+.howard-page-prev { left: 8px; }
+
+.howard-page-next { right: 8px; }
+
+/* --- Page Scaler Wrapper --- */
+
+.howard-page-scaler {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.player-view .howard-page-scaler {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+/* --- Comic Book Page Container --- */
+
+.howard-page {
+  position: relative;
+  width: 520px;
+  height: 780px;
+  flex-shrink: 0;
+  background: var(--s2-bg1);
+  border: 3px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  box-shadow: var(--s2-shadow-panel);
+  overflow: hidden;
+  transform-origin: center center;
+  animation: pageAppear 0.3s ease;
+}
+
+.player-view .howard-page {
+  transform-origin: top left;
+}
+
+/* --- Cover Page (index -1) --- */
+
+.howard-page-cover {
+  border-color: #c8a84e;
+}
+
+.howard-cover-display {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.howard-cover-full {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.howard-cover-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 16px 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+  text-align: center;
+}
+
+.howard-cover-issue {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #c8a84e;
+  margin-bottom: 4px;
+}
+
+.howard-cover-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.howard-page-handout {
+  background:
+    linear-gradient(135deg, rgba(139, 109, 63, 0.08) 0%, transparent 50%),
+    var(--s2-bg1);
+  border-color: rgba(139, 109, 63, 0.4);
+}
+
+.howard-page-stat-block {
+  background:
+    linear-gradient(180deg, rgba(139, 109, 63, 0.06) 0%, var(--s2-bg1) 100%);
+  border-color: rgba(139, 109, 63, 0.3);
+}
+
+@keyframes pageAppear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --- Page Grid Templates --- */
+
+.howard-page-grid {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  gap: 6px;
+  padding: 6px;
+}
+
+.howard-grid-splash {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.howard-grid-cinematic {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+}
+
+.howard-grid-standard {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+}
+
+.howard-grid-dense {
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+}
+
+.howard-grid-split {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+}
+
+.howard-grid-lshape {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.howard-grid-lshape .howard-slot-0 {
+  grid-row: 1 / 3;
+  grid-column: 1;
+}
+
+.howard-grid-lshape .howard-slot-1 {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.howard-grid-lshape .howard-slot-2 {
+  grid-row: 2;
+  grid-column: 2;
+}
+
+.howard-grid-stat-block {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.howard-grid-handout {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+/* --- Panel Base Styling --- */
+
+.howard-panel {
+  position: relative;
+  background: var(--s2-panel);
+  border: 2px solid var(--s2-stroke);
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+}
+
+.howard-panel-inner {
+  position: relative;
+  z-index: 50;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.howard-panel-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--s2-muted);
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.5;
+}
+
+.howard-panel-empty i {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.howard-panel-content {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--s2-text);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* --- Narration Panel --- */
+
+.howard-narration {
+  background: linear-gradient(135deg, rgba(200, 170, 80, 0.08) 0%, transparent 100%);
+  border-left: 3px solid rgba(200, 170, 80, 0.5);
+}
+
+.howard-narration .howard-panel-content {
+  font-style: italic;
+  color: rgba(255, 235, 170, 0.9);
+}
+
+/* --- Dialogue Panel --- */
+
+.howard-dialogue {
+  padding: 8px;
+}
+
+.howard-dialogue-name {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--s2-accent);
+  margin-bottom: 6px;
+}
+
+.howard-dialogue-bubble {
+  flex: 1;
+  background: var(--s2-panel2);
+  border: 2px solid var(--s2-stroke);
+  border-radius: 12px 12px 12px 2px;
+  padding: 8px 10px;
+  position: relative;
+}
+
+.howard-dialogue-bubble .howard-panel-content {
+  font-style: normal;
+  color: var(--s2-text);
+}
+
+/* --- Read-Aloud Panel --- */
+
+.howard-read-aloud {
+  background: linear-gradient(135deg, rgba(72, 187, 120, 0.08) 0%, transparent 100%);
+  border-left: 3px solid rgba(72, 187, 120, 0.5);
+}
+
+.howard-read-aloud .howard-panel-content {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(180, 255, 200, 0.9);
+  line-height: 1.6;
+}
+
+/* --- GM Note Panel --- */
+
+.howard-gm-note {
+  background: rgba(225, 6, 0, 0.05);
+  border: 2px dashed rgba(225, 6, 0, 0.3);
+  border-radius: 3px;
+}
+
+.howard-panel-type-badge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--s2-accent);
+  margin-bottom: 6px;
+  opacity: 0.7;
+}
+
+.howard-gm-note .howard-panel-content {
+  color: rgba(255, 180, 180, 0.8);
+  font-size: 11px;
+}
+
+.howard-panel-hidden {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 8px,
+    rgba(255,255,255,0.02) 8px,
+    rgba(255,255,255,0.02) 16px
+  );
+}
+
+/* --- Skill Check Panel --- */
+
+.howard-skill-check {
+  background: linear-gradient(180deg, rgba(100, 150, 255, 0.06) 0%, transparent 100%);
+  border-left: 3px solid rgba(100, 150, 255, 0.5);
+}
+
+.howard-skill-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--s2-stroke);
+}
+
+.howard-skill-name {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(130, 170, 255, 0.9);
+}
+
+.howard-skill-dc {
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(100, 150, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: rgba(130, 170, 255, 0.9);
+}
+
+.howard-skill-result {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--s2-text);
+  margin-bottom: 4px;
+}
+
+.howard-skill-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+}
+
+.howard-skill-success .howard-skill-label {
+  color: #68d391;
+}
+
+.howard-skill-fail .howard-skill-label {
+  color: #fc8181;
+}
+
+/* --- Image Panel --- */
+
+.howard-image-panel {
+  padding: 0;
+  position: relative;
+}
+
+.howard-panel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.howard-image-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  padding: 8px 10px;
+  font-size: 11px;
+  color: var(--s2-text);
+  font-style: italic;
+}
+
+.howard-image-empty {
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* --- Template Picker Dialog --- */
+
+.howard-template-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 4px;
+}
+
+.howard-template-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: var(--s2-panel);
+  border: 2px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-template-option:hover {
+  border-color: var(--s2-stroke-strong);
+  background: var(--s2-panel2);
+}
+
+.howard-template-option.selected {
+  border-color: var(--s2-accent);
+  background: rgba(225, 6, 0, 0.1);
+  box-shadow: 0 0 8px var(--s2-accent-glow);
+}
+
+.howard-template-thumb {
+  width: 48px;
+  height: 64px;
+  background: var(--s2-bg0);
+  border: 1px solid var(--s2-stroke);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--s2-muted);
+  font-size: 16px;
+}
+
+.howard-template-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--s2-text);
+}
+
+.howard-template-desc {
+  font-size: 9px;
+  color: var(--s2-muted);
+  text-align: center;
+}
+
+/* --- Panel Editor Dialog --- */
+
+.howard-panel-editor textarea {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--s2-bg0);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-text);
+  font-family: var(--s2-font);
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.howard-panel-editor textarea:focus {
+  outline: none;
+  border-color: var(--s2-accent);
+  box-shadow: 0 0 8px var(--s2-accent-glow);
+}
+
+.howard-panel-editor select {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--s2-bg0);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-text);
+  font-family: var(--s2-font);
+  font-size: 13px;
+}
+
+.howard-panel-image-preview {
+  width: 100%;
+  height: 120px;
+  background: var(--s2-panel);
+  border: 2px dashed var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.howard-panel-image-preview:hover {
+  border-color: var(--s2-accent);
+}
+
+.howard-panel-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- Reader Header Layout --- */
+
+.howard-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.howard-reader-title {
+  text-align: center;
+  flex: 1;
+}
+
+.howard-reader-title h1 {
+  font-size: 20px;
+}
+
+/* --- Page Indicator (Footer) --- */
+
+.howard-page-indicator {
+  margin-right: auto;
+}
+
+.howard-page-display {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--s2-muted);
+  letter-spacing: 1px;
+}
+
+/* --- Empty Page State --- */
+
+.howard-page-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 100%;
+  color: var(--s2-muted);
+  font-size: 14px;
+}
+
+/* --- Disabled Button --- */
+
+.howard-header-btn[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* --- Footer Edit Button --- */
+
+.howard-footer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  background: var(--s2-panel);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-muted);
+  font-family: var(--s2-font);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-right: 10px;
+}
+
+.howard-footer-btn:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+/* HOWARD - EDIT SIDEBAR                        */
+
+.howard-main-reader {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.howard-main-play {
+  padding: 4px !important;
+  align-items: stretch !important;
+}
+
+.howard-main-play .howard-page {
+  overflow: hidden !important;
+}
+
+.howard-main-play .howard-page-scaler {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.howard-main-play .howard-page {
+  transform-origin: top left;
+}
+
+.player-view .howard-main-reader {
+  padding: 4px !important;
+  align-items: stretch !important;
+}
+
+.player-view .howard-page-strip {
+  display: none !important;
+}
+
+.player-view .howard-topbar {
+  display: none !important;
+}
+
+/* Player floating back button */
+.howard-player-back-float {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.howard-player-back-float:hover {
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Player window chrome — clean title bar */
+.howard-player .window-header {
+  background: #111 !important;
+  border-bottom: 1px solid #333 !important;
+}
+
+.howard-player .window-header .window-title {
+  color: #fff !important;
+  text-align: center !important;
+  flex: 1 !important;
+  font-size: 13px !important;
+}
+
+.howard-player .window-header .header-button.close .fa-times + span,
+.howard-player .window-header .header-button.close span {
+  display: none !important;
+}
+
+.howard-player .window-header .header-button {
+  color: #aaa !important;
+  font-size: 13px !important;
+}
+
+.howard-player .window-header .header-button:hover {
+  color: #fff !important;
+}
+
+/* Player click-to-zoom cursor */
+.howard-player .howard-panel-freeform,
+.howard-player .howard-text-freeform,
+.howard-player .howard-speech-bubble {
+  cursor: zoom-in;
+}
+
+.player-view .howard-hidden-eye {
+  display: none !important;
+}
+
+/* --- Sidebar container --- */
+
+.howard-edit-sidebar {
+  width: 44px;
+  min-width: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--s2-bg0);
+  border-left: 2px solid var(--s2-stroke);
+  padding: 8px 4px;
+  transition: width 0.25s ease, min-width 0.25s ease;
+  overflow: hidden;
+}
+
+.howard-edit-sidebar.editing {
+  width: 170px;
+  min-width: 170px;
+  padding: 8px;
+}
+
+/* --- Edit toggle button --- */
+
+.howard-sidebar-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--s2-stroke-strong);
+  background: var(--s2-panel);
+  color: var(--s2-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.howard-sidebar-toggle:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+.howard-edit-sidebar.editing .howard-sidebar-toggle {
+  background: var(--s2-accent);
+  border-color: var(--s2-accent);
+  color: #fff;
+}
+
+/* --- Sidebar body (shown when editing) --- */
+
+.howard-sidebar-body {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.howard-edit-sidebar.editing .howard-sidebar-body {
+  display: flex;
+}
+
+/* --- Tool button grid --- */
+
+.howard-tool-grid,
+.howard-page-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.howard-tool-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  background: var(--s2-panel);
+  border: 2px solid var(--s2-stroke);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-muted);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.howard-tool-btn i {
+  font-size: 14px;
+}
+
+.howard-tool-btn span {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  font-family: var(--s2-font);
+}
+
+.howard-tool-btn:hover {
+  border-color: var(--s2-stroke-strong);
+  color: var(--s2-text);
+  background: var(--s2-panel2);
+}
+
+.howard-tool-btn.active {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+  background: rgba(225, 6, 0, 0.1);
+  box-shadow: 0 0 6px var(--s2-accent-glow);
+}
+
+.howard-tool-btn[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* --- Sidebar divider --- */
+
+.howard-sidebar-divider {
+  height: 1px;
+  background: var(--s2-stroke);
+  margin: 4px 0;
+}
+
+/* --- Sidebar editor area --- */
+
+.howard-sidebar-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.howard-sidebar-editor:empty {
+  display: none;
+}
+
+.howard-sidebar-editor textarea {
+  width: 100%;
+  padding: 6px 8px;
+  background: var(--s2-bg0);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-text);
+  font-family: var(--s2-font);
+  font-size: 11px;
+  line-height: 1.4;
+  resize: vertical;
+  box-sizing: border-box;
+  min-height: 60px;
+}
+
+.howard-sidebar-editor textarea:focus {
+  outline: none;
+  border-color: var(--s2-accent);
+  box-shadow: 0 0 6px var(--s2-accent-glow);
+}
+
+.howard-sidebar-editor input[type="text"],
+.howard-sidebar-editor input[type="number"] {
+  width: 100%;
+  padding: 4px 8px;
+  background: var(--s2-bg0);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-text);
+  font-family: var(--s2-font);
+  font-size: 11px;
+  box-sizing: border-box;
+}
+
+.howard-sidebar-editor input:focus {
+  outline: none;
+  border-color: var(--s2-accent);
+  box-shadow: 0 0 6px var(--s2-accent-glow);
+}
+
+.howard-sidebar-editor label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--s2-muted);
+  font-family: var(--s2-font);
+}
+
+/* --- Save button --- */
+
+.howard-sidebar-save-btn {
+  width: 100%;
+  padding: 6px;
+  background: var(--s2-accent);
+  border: none;
+  border-radius: var(--s2-radius-small);
+  color: #fff;
+  font-family: var(--s2-font);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.howard-sidebar-save-btn:hover {
+  filter: brightness(1.2);
+}
+
+/* --- Image preview in sidebar --- */
+
+.howard-sidebar-image-preview {
+  width: 100%;
+  height: 80px;
+  background: var(--s2-panel);
+  border: 2px dashed var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.howard-sidebar-image-preview:hover {
+  border-color: var(--s2-accent);
+}
+
+.howard-sidebar-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- Panel Lock Icon --- */
+
+.howard-panel-lock {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  height: 22px;
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--s2-muted);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  cursor: pointer;
+  z-index: 55;
+  transition: all 0.2s ease;
+  opacity: 0.4;
+  width: 22px;
+  overflow: hidden;
+}
+
+.howard-panel-lock:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.howard-panel-lock .lock-icon,
+.howard-panel-lock .relock-icon,
+.howard-panel-lock .delete-icon {
+  flex-shrink: 0;
+  width: 22px;
+  text-align: center;
+  line-height: 22px;
+}
+
+.howard-panel-lock .relock-icon,
+.howard-panel-lock .delete-icon {
+  display: none;
+}
+
+.howard-panel-lock.unlocked {
+  width: 48px;
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.8);
+  gap: 0;
+}
+
+.howard-panel-lock.unlocked .lock-icon {
+  display: none;
+}
+
+.howard-panel-lock.unlocked .relock-icon {
+  display: block;
+  color: var(--s2-accent);
+}
+
+.howard-panel-lock.unlocked .delete-icon {
+  display: block;
+  color: #e74c3c;
+}
+
+.howard-panel-lock.unlocked .relock-icon:hover {
+  color: #fff;
+}
+
+.howard-panel-lock.unlocked .delete-icon:hover {
+  color: #ff6b6b;
+}
+
+/* --- Page Background --- */
+
+.howard-page-background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+/* --- Image Layers --- */
+
+.howard-layer-image {
+  position: absolute;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+/* --- Image Mode (tool active) --- */
+
+.howard-reader-editing.howard-image-mode .howard-panel {
+  cursor: crosshair;
+}
+
+.howard-reader-editing.howard-image-mode .howard-panel:hover {
+  box-shadow: 0 0 0 2px var(--s2-accent);
+}
+
+.howard-tool-btn.active {
+  background: var(--s2-accent) !important;
+  color: #fff !important;
+  border-color: var(--s2-accent) !important;
+}
+
+/* --- Bottom Layer (deleted panel slot) --- */
+
+.howard-bottom-layer {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.howard-panel-empty-slot {
+  border-color: transparent;
+  background: transparent;
+}
+
+/* --- Page-Level Text Blocks --- */
+
+.howard-text-block {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 60;
+  width: fit-content;
+  max-width: 90%;
+  white-space: pre-wrap;
+  pointer-events: none;
+}
+
+.howard-text-block-content {
+  background: rgba(0, 0, 0, 0.75);
+  color: #f0e6d2;
+  font-family: var(--s2-font);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 6px 10px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.howard-text-block.howard-tb-moving {
+  pointer-events: auto !important;
+  cursor: grab;
+  outline: 2px solid #3498db;
+  z-index: 200 !important;
+}
+
+.howard-text-block.howard-tb-moving:active {
+  cursor: grabbing;
+}
+
+/* --- Text Block Resize Handle --- */
+
+.howard-tb-resize-handle {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  background: #3498db;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 2px;
+  cursor: se-resize;
+  pointer-events: auto;
+  z-index: 10;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.howard-tb-resize-handle:hover {
+  opacity: 1;
+}
+
+.howard-text-block.howard-tb-resizing {
+  pointer-events: auto !important;
+  outline: 1px dashed rgba(52, 152, 219, 0.5);
+}
+
+.howard-text-block.howard-tb-moving .howard-tb-resize-handle {
+  display: none;
+}
+
+/* --- Text Block Placement Mode (draw-to-place) --- */
+
+.howard-page.howard-tb-placing {
+  cursor: crosshair !important;
+}
+
+.howard-page.howard-tb-placing * {
+  cursor: crosshair !important;
+  pointer-events: none !important;
+}
+
+.howard-tb-place-preview {
+  position: absolute;
+  border: 2px dashed rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 300;
+}
+
+/* --- Speech Bubble Style --- */
+
+.howard-text-block-content.howard-tb-style-speech {
+  background: #fff;
+  color: #1a1a1a;
+  font-weight: 400;
+  border-radius: 14px;
+  border: 2px solid #333;
+  padding: 8px 14px;
+  position: relative;
+}
+
+.howard-tb-style-speech[data-tail="bl"]::before {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 14px;
+  border-width: 20px 10px 0;
+  border-style: solid;
+  border-color: #333 transparent transparent;
+}
+
+.howard-tb-style-speech[data-tail="bl"]::after {
+  content: '';
+  position: absolute;
+  bottom: -17px;
+  left: 16px;
+  border-width: 18px 8px 0;
+  border-style: solid;
+  border-color: #fff transparent transparent;
+}
+
+.howard-tb-style-speech[data-tail="b"]::before {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 20px 10px 0;
+  border-style: solid;
+  border-color: #333 transparent transparent;
+}
+
+.howard-tb-style-speech[data-tail="b"]::after {
+  content: '';
+  position: absolute;
+  bottom: -17px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 18px 8px 0;
+  border-style: solid;
+  border-color: #fff transparent transparent;
+}
+
+.howard-tb-style-speech[data-tail="br"]::before {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  right: 14px;
+  border-width: 20px 10px 0;
+  border-style: solid;
+  border-color: #333 transparent transparent;
+}
+
+.howard-tb-style-speech[data-tail="br"]::after {
+  content: '';
+  position: absolute;
+  bottom: -17px;
+  right: 16px;
+  border-width: 18px 8px 0;
+  border-style: solid;
+  border-color: #fff transparent transparent;
+}
+
+.howard-tb-style-speech[data-tail="tl"]::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 14px;
+  border-width: 0 10px 20px;
+  border-style: solid;
+  border-color: transparent transparent #333;
+}
+
+.howard-tb-style-speech[data-tail="tl"]::after {
+  content: '';
+  position: absolute;
+  top: -17px;
+  left: 16px;
+  border-width: 0 8px 18px;
+  border-style: solid;
+  border-color: transparent transparent #fff;
+}
+
+.howard-tb-style-speech[data-tail="t"]::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 10px 20px;
+  border-style: solid;
+  border-color: transparent transparent #333;
+}
+
+.howard-tb-style-speech[data-tail="t"]::after {
+  content: '';
+  position: absolute;
+  top: -17px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 8px 18px;
+  border-style: solid;
+  border-color: transparent transparent #fff;
+}
+
+.howard-tb-style-speech[data-tail="tr"]::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: 14px;
+  border-width: 0 10px 20px;
+  border-style: solid;
+  border-color: transparent transparent #333;
+}
+
+.howard-tb-style-speech[data-tail="tr"]::after {
+  content: '';
+  position: absolute;
+  top: -17px;
+  right: 16px;
+  border-width: 0 8px 18px;
+  border-style: solid;
+  border-color: transparent transparent #fff;
+}
+
+.howard-tb-style-speech[data-tail="l"]::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 10px 20px 10px 0;
+  border-style: solid;
+  border-color: transparent #333 transparent transparent;
+}
+
+.howard-tb-style-speech[data-tail="l"]::after {
+  content: '';
+  position: absolute;
+  left: -17px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 8px 18px 8px 0;
+  border-style: solid;
+  border-color: transparent #fff transparent transparent;
+}
+
+.howard-tb-style-speech[data-tail="r"]::before {
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 10px 0 10px 20px;
+  border-style: solid;
+  border-color: transparent transparent transparent #333;
+}
+
+.howard-tb-style-speech[data-tail="r"]::after {
+  content: '';
+  position: absolute;
+  right: -17px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 8px 0 8px 18px;
+  border-style: solid;
+  border-color: transparent transparent transparent #fff;
+}
+
+/* --- Text Block Dialog --- */
+
+.howard-lgrid-card .howard-tb-preview {
+  padding: 6px;
+  font-size: 10px;
+  line-height: 1.3;
+  color: #ccc;
+  white-space: pre-wrap;
+  overflow: hidden;
+  height: 100%;
+}
+
+.howard-lgrid-card .howard-tb-edit {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  background: var(--s2-bg0);
+  border: none;
+  color: #fff;
+  font-family: var(--s2-font);
+  font-size: 11px;
+  padding: 6px;
+  outline: none;
+}
+
+.howard-lgrid-add-card .howard-tb-new-textarea {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: var(--s2-font);
+  font-size: 11px;
+  padding: 6px;
+  outline: none;
+}
+
+.howard-lgrid-add-card .howard-tb-new-textarea::placeholder {
+  color: var(--s2-muted);
+}
+
+.howard-tb-style-row {
+  gap: 4px;
+}
+
+.howard-tb-style-row select {
+  flex: 1;
+  min-width: 0;
+  padding: 1px 2px;
+  font-size: 10px;
+  background: #1a1a1a;
+  color: #ccc;
+  border: 1px solid var(--s2-border);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.howard-tb-style-row select option {
+  background: #1a1a1a;
+  color: #ccc;
+}
+
+.howard-textblocks-window .dialog-buttons {
+  display: none;
+}
+
+/* --- Undo Button --- */
+
+.howard-sidebar-undo-btn {
+  width: 100%;
+  padding: 6px;
+  background: var(--s2-panel2);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-muted);
+  font-family: var(--s2-font);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.howard-sidebar-undo-btn:hover {
+  border-color: var(--s2-accent);
+  color: var(--s2-accent);
+}
+
+
+/* ===== Howard Check Card (from conan.css) ===== */
+
+/* Howard skill check card — Conan gold/bronze theme overrides */
+
+.howard-check-card {
+  border-color: #c8a84e !important;
+}
+
+.howard-check-card .spell-chat-header {
+  background: linear-gradient(180deg, #2a2210 0%, #1a1508 100%);
+}
+
+.howard-check-card .spell-chat-portrait {
+  border-color: #c8a84e;
+}
+
+.howard-check-card .spell-chat-effect {
+  border-left-color: #c8a84e;
+}
+
+.howard-check-card .howard-check-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 5px;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 3px solid #c8a84e;
+  background: linear-gradient(135deg, #2a2210, #1a1508);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #FFD700;
+  box-shadow: 0 0 10px rgba(200, 168, 78, 0.6);
+}
+
+/* =============================================
+   Howard Check Roll Button (chat card)
+   ============================================= */
+.howard-check-roll-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #2a2210, #1a1508);
+  border: 2px solid #c8a84e;
+  border-radius: 6px;
+  color: #FFD700;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.howard-check-roll-btn:hover {
+  background: linear-gradient(135deg, #3a3218, #2a2210);
+  box-shadow: 0 0 12px rgba(200, 168, 78, 0.4);
+}
+
+/* =============================================
+   Howard Check Outcome Card (chat)
+   ============================================= */
+.howard-outcome-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, #2a2210 0%, #1a1508 100%);
+  border-bottom: 1px solid rgba(200, 168, 78, 0.3);
+}
+.howard-outcome-portrait {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #c8a84e;
+  object-fit: cover;
+}
+.howard-outcome-title {
+  flex: 1;
+  color: #e8e0f0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.howard-outcome-title strong { color: #FFD700; }
+.howard-outcome-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.howard-outcome-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.howard-outcome-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.howard-outcome-tag.pass {
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #81C784;
+}
+.howard-outcome-tag.fail {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.2);
+  color: #E57373;
+}
+.howard-outcome-tag i { font-size: 10px; }
+.howard-outcome-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.howard-outcome-label.success { color: #4CAF50; }
+.howard-outcome-label.fail { color: #F44336; }
+.howard-outcome-text {
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  border-radius: 2px;
+}
+.howard-outcome-text.success {
+  color: #81C784;
+  background: rgba(76, 175, 80, 0.08);
+  border-left: 2px solid #4CAF50;
+}
+.howard-outcome-text.fail {
+  color: #E57373;
+  background: rgba(244, 67, 54, 0.08);
+  border-left: 2px solid #F44336;
+}
+
+/* =============================================
+   Presentation GM Notes Dialog
+   ============================================= */
+.pres-gm-notes-dialog .dialog-content {
+  padding: 0 !important;
+  height: 100%;
+  overflow: hidden;
+}
+.pres-gm-notes-dialog .dialog-buttons {
+  flex: 0 0 auto !important;
+  padding: 4px 14px 8px;
+}
+.pres-gm-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  color: #fff;
+  height: 100%;
+  box-sizing: border-box;
+}
+.pres-gm-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #2a2a2e;
+  padding-bottom: 6px;
+}
+.pres-gm-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+.pres-gm-fight-btn {
+  margin-left: auto;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8B0000, #CC2200);
+  color: #fff;
+  border: 1px solid #FF4444;
+  border-radius: 4px;
+  padding: 0;
+  font-size: 16px;
+  cursor: pointer;
+}
+.pres-gm-fight-btn:hover {
+  background: linear-gradient(135deg, #AA0000, #EE3300);
+  box-shadow: 0 0 8px rgba(255, 50, 0, 0.5);
+}
+.pres-gm-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.pres-gm-section:has(.pres-gm-notes-text) {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.pres-gm-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.60);
+}
+.pres-gm-enemy-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.pres-gm-enemy-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: #1B1B20;
+  border: 2px solid #2a2a2e;
+  color: #fff;
+  transition: all 0.15s ease;
+}
+.pres-gm-enemy-linked {
+  border-color: #E10600;
+  color: #fff;
+  cursor: grab;
+}
+.pres-gm-enemy-linked:hover {
+  border-color: #E10600;
+  background: rgba(225,6,0,0.25);
+  box-shadow: 0 0 8px rgba(225,6,0,0.4);
+}
+.pres-gm-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.pres-gm-check-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: #1B1B20;
+  border: 2px solid #2a2a2e;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.pres-gm-check-tag:hover {
+  border-color: #E10600;
+  box-shadow: 0 0 8px rgba(225,6,0,0.4);
+}
+.pres-gm-check-tag i {
+  font-size: 11px;
+  color: #E10600;
+}
+.pres-gm-notes-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #fff;
+  flex: 1;
+  min-height: 60px;
+  overflow-y: auto;
+  padding: 8px 10px;
+  background: #0B0B0D;
+  border-radius: 8px;
+  border: 2px solid #2a2a2e;
+}
+.pres-gm-empty {
+  font-size: 13px;
+  color: rgba(255,255,255,0.60);
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+/* =============================================
+   GM Check Control Dialog (Howard skill checks)
+   ============================================= */
+.gm-check-dialog .dialog-content { padding: 0 !important; }
+.gm-check-dialog .dialog-buttons { display: none; }
+.gm-check-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  color: #e0e0e0;
+}
+.gm-check-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(200, 168, 78, 0.08);
+  border: 1px solid rgba(200, 168, 78, 0.2);
+  border-radius: 6px;
+}
+.gm-check-icon { font-size: 22px; color: #FFD700; }
+.gm-check-stat { font-weight: 700; color: #e8e0f0; font-size: 14px; }
+.gm-check-dc { color: #FFD700; font-size: 12px; }
+.gm-check-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #666;
+}
+.gm-check-success-preview {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  background: rgba(76, 175, 80, 0.06);
+  border-left: 2px solid #4CAF50;
+  border-radius: 2px;
+}
+.gm-check-player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gm-check-player-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.gm-check-player-token {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #444;
+  object-fit: cover;
+}
+.gm-check-player-name {
+  flex: 1;
+  font-weight: 600;
+  color: #ccc;
+  font-size: 13px;
+}
+.gm-check-player-result {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.gm-check-player-result.pass {
+  color: #81C784;
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+.gm-check-player-result.fail {
+  color: #E57373;
+  background: rgba(244, 67, 54, 0.15);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+.gm-check-toggle {
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  font-size: 12px;
+  transition: all 0.15s ease;
+}
+.gm-check-toggle:hover { border-color: #888; }
+.gm-check-toggle.checked {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: #4CAF50;
+  color: #81C784;
+}
+.gm-check-reveal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: linear-gradient(135deg, #2a2210, #1a1508);
+  border: 2px solid #c8a84e;
+  border-radius: 6px;
+  color: #FFD700;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.gm-check-reveal-btn:hover {
+  background: linear-gradient(135deg, #3a3218, #2a2210);
+  box-shadow: 0 0 12px rgba(200, 168, 78, 0.4);
+}
+.gm-check-empty {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 8px;
+}
+
+/* =============================================
+   Roll Call Dialog (ad-hoc checks)
+   ============================================= */
+.rollcall-dialog .dialog-content { padding: 0 !important; }
+.rollcall-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  color: #e0e0e0;
+}
+.rollcall-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #666;
+}
+.rollcall-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.rollcall-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+  cursor: pointer;
+}
+.rollcall-radio input[type="radio"] {
+  accent-color: #FFD700;
+  margin: 0;
+}
+.rollcall-custom-name {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #e0e0e0;
+  padding: 3px 6px;
+  font-size: 12px;
+  font-family: inherit;
+}
+.rollcall-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rollcall-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ccc;
+}
+.rollcall-tn {
+  width: 60px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #FFD700;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 4px 8px;
+  text-align: center;
+  font-family: inherit;
+}
+.rollcall-success-text {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-size: 13px;
+  padding: 6px 8px;
+  resize: vertical;
+  font-family: inherit;
+}

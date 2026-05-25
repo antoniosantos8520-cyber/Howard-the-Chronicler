@@ -1,0 +1,717 @@
+<form class="howard-sheet {{#if isGM}}gm-view{{else}}player-view{{/if}}">
+  <div class="howard-container">
+
+    {{!-- Header: rack mode only (hidden in reader mode) --}}
+    <header class="howard-header {{#if inReaderMode}}howard-header-hidden{{/if}}">
+      {{#unless inReaderMode}}
+        {{!-- Rack header --}}
+        <div class="howard-title">
+          <h1>Howard the Chronicler</h1>
+          <p class="howard-subtitle">Where Tales Are Forged</p>
+        </div>
+        {{#if isGM}}
+        <div class="howard-header-actions">
+          <button type="button" class="howard-header-btn howard-add-tale-btn">
+            <i class="fas fa-plus"></i> New Tale
+          </button>
+          {{#unless isEmpty}}
+          <button type="button" class="howard-header-btn howard-delete-tale-btn">
+            <i class="fas fa-trash"></i> Delete Tale
+          </button>
+          <button type="button" class="howard-header-btn howard-export-btn" title="Export tale as PDF">
+            <i class="fas fa-file-pdf"></i> Export
+          </button>
+          {{/unless}}
+          {{#if canUndoTale}}
+          <button type="button" class="howard-header-btn howard-undo-tale-btn" title="Restore deleted tale">
+            <i class="fas fa-undo"></i> Undo
+          </button>
+          {{/if}}
+        </div>
+        {{/if}}
+      {{/unless}}
+    </header>
+
+    {{!-- Main Content Area --}}
+    <main class="howard-main {{#if inReaderMode}}howard-main-reader{{/if}} {{#if isPlayMode}}howard-main-play{{/if}}">
+
+      {{#if inReaderMode}}
+      {{!-- ========================== --}}
+      {{!-- EDITOR MODE (Full Screen)  --}}
+      {{!-- ========================== --}}
+
+      {{!-- Top Bar --}}
+      <div class="howard-topbar">
+        <div class="howard-topbar-strip-col">
+          <button type="button" class="howard-topbar-back howard-back-to-rack" title="{{#if isPlayMode}}Back to Forge{{else}}Back to rack{{/if}}">
+            <i class="fas {{#if isPlayMode}}fa-hammer{{else}}fa-arrow-left{{/if}}"></i>
+          </button>
+        </div>
+        {{#if isGM}}
+          {{#if isPlayMode}}
+          <button type="button" class="howard-topbar-btn howard-pres-play-btn" title="Open comic for players">
+            <i class="fas fa-play"></i> Play
+          </button>
+          <button type="button" class="howard-topbar-btn howard-pres-notes-btn" title="GM Notes for this page">
+            <i class="fas fa-book"></i>
+          </button>
+          <button type="button" class="howard-topbar-btn howard-pres-rollcall-btn" title="Roll Call — ad-hoc skill check">
+            <i class="fas fa-dice-d20"></i>
+          </button>
+          {{else}}
+          <button type="button" class="howard-topbar-btn howard-play-btn" title="Switch to Presentation mode">
+            <i class="fas fa-tv"></i> Present
+          </button>
+          {{/if}}
+        {{/if}}
+      </div>
+
+      {{!-- Three-Column Layout --}}
+      <div class="howard-editor-layout">
+
+        {{!-- LEFT: Page List Strip --}}
+        <div class="howard-page-strip">
+          {{#if isGM}}
+          {{#unless isPlayMode}}
+          <div class="howard-page-strip-controls">
+            <button type="button" class="howard-page-strip-btn howard-add-page-btn" title="Add new page">
+              <i class="fas fa-plus"></i>
+            </button>
+            <button type="button" class="howard-page-strip-btn howard-delete-page-btn" title="Delete current page">
+              <i class="fas fa-minus"></i>
+            </button>
+          </div>
+          {{/unless}}
+          {{/if}}
+          <div class="howard-page-strip-list">
+            {{#each pageStripItems as |item|}}
+            <button type="button" class="howard-page-strip-item {{#if item.active}}active{{/if}} {{#if item.isPageHidden}}howard-page-hidden{{/if}}"
+                    data-page-index="{{item.index}}" data-page-id="{{item.pageId}}" title="Page {{item.display}}">
+              {{item.display}}
+            </button>
+            {{/each}}
+          </div>
+        </div>
+
+        {{!-- CENTER: Comic Display --}}
+        <div class="howard-comic-display">
+          {{!-- Page Arrows (side overlays) --}}
+          {{#if canGoBack}}
+          <button type="button" class="howard-page-arrow howard-page-prev" aria-label="Previous page">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          {{/if}}
+          {{#if canGoForward}}
+          <button type="button" class="howard-page-arrow howard-page-next" aria-label="Next page">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+          {{/if}}
+
+          {{#if isCoverPage}}
+          <div class="howard-page-scaler">
+          <div class="howard-page howard-page-cover">
+            <div class="howard-cover-display">
+              <img src="{{coverImage}}" class="howard-cover-full" />
+              <div class="howard-cover-overlay">
+                <span class="howard-cover-issue">Issue #{{readerIssueNumber}}</span>
+                <h2 class="howard-cover-title">{{readerTaleTitle}}</h2>
+              </div>
+            </div>
+          </div>
+          </div>
+          {{else if currentPage}}
+          <div class="howard-page-scaler">
+          <div class="howard-page howard-page-content">
+            {{#if pageBackground}}
+            <img src="{{pageBackground}}" class="howard-page-background" />
+            {{/if}}
+
+            {{!-- Page-level image layers (managed by PAGE tool) --}}
+            {{#each currentPageImages as |img|}}
+            <img src="{{img.imagePath}}" class="howard-page-layer-image" data-image-id="{{img.id}}"
+                 style="z-index: {{img.layerNum}}; left: {{img.posX}}%; top: {{img.posY}}%" />
+            {{/each}}
+
+            {{!-- Freeform panels --}}
+            {{#each currentPanels as |panel|}}
+            <div class="howard-panel howard-panel-freeform {{#if panel.transparent}}howard-panel-transparent{{/if}} {{#if panel.isHiddenForPresentation}}howard-pres-hidden{{/if}} {{#if panel.isRevealed}}howard-panel-revealed{{/if}}"
+                 data-panel-id="{{panel.id}}"
+                 style="left: {{panel.x}}%; top: {{panel.y}}%; width: {{panel.width}}%; height: {{panel.height}}%; z-index: {{panel.zIndex}};">
+
+              {{!-- Panel image layers --}}
+              {{#if panel.hasLayers}}
+              {{#each panel.layers as |layer|}}
+              <img src="{{layer.imagePath}}" class="howard-layer-image" data-layer-id="{{layer.id}}" style="z-index: {{layer.layerNum}}; left: {{layer.posX}}%; top: {{layer.posY}}%; width: {{layer.zoom}}%" />
+              {{/each}}
+              {{/if}}
+
+              {{!-- Panel content (text, if any) --}}
+              {{#if panel.hasContent}}
+              <div class="howard-panel-inner">
+                <div class="howard-panel-content">{{panel.content}}</div>
+              </div>
+              {{/if}}
+              {{#unless ../isPlayMode}}{{#if panel.isHidden}}<div class="howard-hidden-eye"><i class="fas fa-eye-slash"></i></div>{{/if}}{{/unless}}
+              {{#if ../isPlayMode}}<div class="howard-pres-controls">
+                <button type="button" class="howard-pres-ctrl howard-pres-eye" title="Toggle visibility"><i class="fas {{#if panel.isHidden}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button>
+                <button type="button" class="howard-pres-ctrl howard-pres-zoom" title="Zoom"><i class="fas fa-search-plus"></i></button>
+              </div>{{/if}}
+            </div>
+            {{/each}}
+
+            {{!-- Text blocks --}}
+            {{#each currentTextBlocks as |tb|}}
+            <div class="howard-text-block howard-text-freeform {{#if tb.transparent}}howard-tb-transparent{{/if}} {{#if tb.isHiddenForPresentation}}howard-pres-hidden{{/if}} {{#if tb.isRevealed}}howard-tb-revealed{{/if}}" data-tb-id="{{tb.id}}"
+                 style="left: {{tb.x}}%; top: {{tb.y}}%; width: {{tb.width}}%; height: {{tb.height}}%; z-index: {{tb.zIndex}};">
+              <div class="howard-text-block-content howard-tb-style-{{tb.style}}">{{tb.content}}</div>
+              {{#unless ../isPlayMode}}{{#if tb.isHidden}}<div class="howard-hidden-eye"><i class="fas fa-eye-slash"></i></div>{{/if}}{{/unless}}
+              {{#if ../isPlayMode}}<div class="howard-pres-controls">
+                <button type="button" class="howard-pres-ctrl howard-pres-eye" title="Toggle visibility"><i class="fas {{#if tb.isHidden}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button>
+              </div>{{/if}}
+            </div>
+            {{/each}}
+
+            {{!-- Speech bubble SVG tails --}}
+            <svg class="howard-speech-tail-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+              {{#each currentSpeechBubbles as |sb|}}
+              {{#if sb.tailPoints}}
+              <polygon data-sb-id="{{sb.id}}" points="{{sb.tailPoints}}"
+                       fill="#fff" stroke="#333" stroke-width="0.4"
+                       {{#if sb.isHiddenForPresentation}}class="howard-pres-hidden-svg"{{/if}} />
+              {{/if}}
+              {{/each}}
+            </svg>
+
+            {{!-- Speech bubbles --}}
+            {{#each currentSpeechBubbles as |sb|}}
+            <div class="howard-speech-bubble howard-speech-freeform {{#if sb.isHiddenForPresentation}}howard-pres-hidden{{/if}}" data-sb-id="{{sb.id}}"
+                 style="left: {{sb.x}}%; top: {{sb.y}}%; width: {{sb.width}}%; height: {{sb.height}}%; z-index: {{sb.zIndex}};">
+              <div class="howard-speech-bubble-content">{{sb.content}}</div>
+              {{#unless ../isPlayMode}}{{#if sb.isHidden}}<div class="howard-hidden-eye"><i class="fas fa-eye-slash"></i></div>{{/if}}{{/unless}}
+              {{#if ../isPlayMode}}<div class="howard-pres-controls">
+                <button type="button" class="howard-pres-ctrl howard-pres-eye" title="Toggle visibility"><i class="fas {{#if sb.isHidden}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button>
+              </div>{{/if}}
+            </div>
+            {{/each}}
+
+            {{!-- Check markers (GM only — positioned icons) --}}
+            {{#if isGM}}
+            {{#each currentChecks as |chk|}}
+            <div class="howard-check-marker {{#if chk.fired}}howard-check-fired{{/if}}" data-check-id="{{chk.id}}"
+                 style="left: {{chk.posX}}%; top: {{chk.posY}}%;"
+                 title="{{chk.skillName}} DC {{chk.dc}}">
+              <i class="fas fa-dice-d20"></i>
+            </div>
+            {{/each}}
+            {{/if}}
+
+          </div>
+          </div>
+          {{else}}
+          <div class="howard-page-empty">
+            <p>No pages yet.</p>
+            {{#if isGM}}
+            <button type="button" class="howard-header-btn howard-add-page-btn">
+              <i class="fas fa-plus"></i> Add First Page
+            </button>
+            {{/if}}
+          </div>
+          {{/if}}
+
+          {{!-- Page indicator --}}
+          <div class="howard-page-indicator">
+            <span class="howard-page-display">{{pageDisplay}}</span>
+          </div>
+        </div>
+
+        {{!-- RIGHT: GM/Forge Panel (GM only, not in Presentation mode) --}}
+        {{#if isGM}}
+        {{#unless isPlayMode}}
+        <div class="howard-right-panel">
+
+          {{!-- Mode Toggle --}}
+          <div class="howard-mode-toggle">
+            <button type="button" class="howard-mode-btn {{#if isGmMode}}active{{/if}}" data-mode="gm">GM</button>
+            <button type="button" class="howard-mode-btn {{#if isForgeMode}}active{{/if}}" data-mode="forge">Forge</button>
+          </div>
+
+          {{!-- GM Mode Panel --}}
+          {{#if isGmMode}}
+          <div class="howard-gm-panel">
+
+            {{!-- Fight Scene Picker --}}
+            <div class="howard-gm-fight-scene">
+              <span class="howard-gm-fight-label">FIGHT:</span>
+              <select class="howard-fight-scene-select">
+                <option value="">— none —</option>
+                {{#each sceneList}}
+                <option value="{{this.id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+                {{/each}}
+              </select>
+            </div>
+
+            {{!-- Actors Section (enemies, NPCs, any actors) --}}
+            <div class="howard-gm-section howard-gm-enemies">
+              <div class="howard-gm-section-header">
+                <span class="howard-gm-section-label">Actors</span>
+                <input type="text" class="howard-enemy-input" placeholder="Actor name..." />
+                <button type="button" class="howard-enemy-add-btn" title="Add by name">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+              <div class="howard-enemy-tags">
+                {{#each currentEnemies as |enemy|}}
+                <span class="howard-enemy-tag {{#if enemy.uuid}}howard-enemy-tag-linked{{else}}{{#if enemy.category}}howard-enemy-tag-linked{{/if}}{{/if}}" data-index="{{@index}}" data-enemy-id="{{enemy.enemyId}}" data-category="{{enemy.category}}" data-group="{{enemy.group}}" data-uuid="{{enemy.uuid}}" {{#if enemy.uuid}}draggable="true"{{else}}{{#if enemy.category}}draggable="true"{{/if}}{{/if}}>
+                  {{#if enemy.img}}<img class="howard-enemy-tag-img" src="{{enemy.img}}" />{{/if}}
+                  <span class="howard-enemy-tag-link" title="{{#if enemy.uuid}}Open sheet &#8226; Drag to canvas{{else}}{{#if enemy.category}}Open in Albert &#8226; Drag to canvas{{else}}Text only{{/if}}{{/if}}">{{enemy.name}}</span><button type="button" class="howard-enemy-tag-x" title="Remove">&times;</button>
+                </span>
+                {{/each}}
+              </div>
+            </div>
+
+            {{!-- Checks Section --}}
+            <div class="howard-gm-section howard-gm-checks">
+              <div class="howard-gm-section-header">
+                <i class="fas fa-dice-d20"></i>
+                <span class="howard-gm-section-label">Checks</span>
+                <button type="button" class="howard-check-add-btn" title="Add check">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+
+              {{#if checkEditId}}
+              {{!-- Check inline edit view --}}
+              <div class="howard-check-edit-inline" data-check-id="{{checkEditId}}">
+                <button type="button" class="howard-forge-back-btn howard-check-edit-back">
+                  <i class="fas fa-arrow-left"></i> Checks
+                </button>
+                <div class="howard-check-edit-fields">
+                  <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
+                    <label style="width:40px;font-size:11px;">Skill</label>
+                    <input type="text" class="howard-check-edit-skill" value="{{checkEditData.skillName}}" style="flex:1;" />
+                  </div>
+                  <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
+                    <label style="width:40px;font-size:11px;">DC</label>
+                    <input type="number" class="howard-check-edit-dc" value="{{checkEditData.dc}}" min="1" max="30" style="width:60px;" />
+                  </div>
+                  <textarea class="howard-check-edit-prompt" rows="3" placeholder="Description...">{{checkEditData.prompt}}</textarea>
+                </div>
+                <div class="howard-check-edit-actions">
+                  <button type="button" class="howard-forge-card-btn howard-check-edit-move" title="Move on page">
+                    <i class="fas fa-crosshairs"></i> Move
+                  </button>
+                  <button type="button" class="howard-forge-add-btn howard-check-edit-save">
+                    <i class="fas fa-check"></i> Save
+                  </button>
+                  <button type="button" class="howard-forge-card-btn howard-check-edit-delete" title="Delete check">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+              </div>
+
+              {{else}}
+              {{!-- Check icon row (default view) --}}
+              <div class="howard-check-icon-row">
+                {{#each currentChecks as |check|}}
+                <div class="howard-check-icon {{#if check.fired}}howard-check-icon-fired{{/if}}" data-check-id="{{check.id}}"
+                     title="{{check.skillName}} DC {{check.dc}}">
+                  <i class="fas fa-dice-d20"></i>
+                </div>
+                {{/each}}
+              </div>
+              {{/if}}
+            </div>
+
+            {{!-- Notes Section --}}
+            <div class="howard-gm-section howard-gm-notes">
+              <div class="howard-gm-section-header">
+                <span class="howard-gm-section-label">Notes</span>
+                <input type="text" class="howard-notes-title" placeholder="Page title..." value="{{currentGmNotes.title}}" />
+              </div>
+              <textarea class="howard-notes-text" placeholder="GM notes for this page...">{{currentGmNotes.notes}}</textarea>
+            </div>
+
+          </div>
+          {{/if}}
+
+          {{!-- Forge Mode Panel --}}
+          {{#if isForgeMode}}
+          <div class="howard-forge-panel">
+
+            {{!-- Forge Tool Bar --}}
+            <div class="howard-forge-toolbar">
+              <button type="button" class="howard-forge-tool-btn {{#if (eq forgeTool 'page')}}active{{/if}}" data-forge-tool="page" title="Page images & background">
+                <i class="fas fa-image"></i>
+                <span>Page</span>
+              </button>
+              <button type="button" class="howard-forge-tool-btn {{#if (eq forgeTool 'panel')}}active{{/if}}" data-forge-tool="panel" title="Draw & manage panels">
+                <i class="fas fa-vector-square"></i>
+                <span>Panel</span>
+              </button>
+              <button type="button" class="howard-forge-tool-btn {{#if (eq forgeTool 'text')}}active{{/if}}" data-forge-tool="text" title="Text blocks">
+                <i class="fas fa-font"></i>
+                <span>Text</span>
+              </button>
+              <button type="button" class="howard-forge-tool-btn {{#if (eq forgeTool 'speech')}}active{{/if}}" data-forge-tool="speech" title="Speech bubbles">
+                <i class="fas fa-comment"></i>
+                <span>Speech</span>
+              </button>
+            </div>
+
+            {{!-- Dynamic Editor --}}
+            <div class="howard-dynamic-editor">
+
+              {{!-- PAGE Tool: page-level image layers --}}
+              {{#if (eq forgeTool 'page')}}
+              <div class="howard-forge-page-tool">
+                {{#if currentPage}}
+                <div class="howard-forge-card-grid {{#if pageToolLocked}}howard-page-locked{{/if}}">
+                  {{#each currentPageImages as |img|}}
+                  <div class="howard-forge-card" data-image-id="{{img.id}}">
+                    <div class="howard-forge-card-thumb">
+                      <img src="{{img.imagePath}}" />
+                    </div>
+                    <div class="howard-forge-card-controls">
+                      <span class="howard-forge-card-layer" title="Layer {{img.layerNum}}">{{img.layerNum}}</span>
+                      <button type="button" class="howard-forge-card-btn howard-image-move" title="Move image position">
+                        <i class="fas fa-crosshairs"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-layer-up" title="Layer up">
+                        <i class="fas fa-arrow-up"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-layer-down" title="Layer down">
+                        <i class="fas fa-arrow-down"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-image-delete" title="Delete">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  {{/each}}
+                  {{!-- Lock card — always last in grid --}}
+                  <div class="howard-forge-card howard-page-lock-card {{#if pageToolLocked}}locked{{/if}}" title="{{#if pageToolLocked}}Unlock page controls{{else}}Lock page controls{{/if}}">
+                    <i class="fas {{#if pageToolLocked}}fa-lock{{else}}fa-lock-open{{/if}}"></i>
+                  </div>
+                </div>
+                <button type="button" class="howard-forge-add-btn howard-add-page-image {{#if pageToolLocked}}howard-btn-locked{{/if}}">
+                  <i class="fas fa-plus"></i> Add Image
+                </button>
+                {{else}}
+                <div class="howard-forge-empty">Add a page first</div>
+                {{/if}}
+              </div>
+              {{/if}}
+
+              {{!-- PANEL Tool: freeform panel management --}}
+              {{#if (eq forgeTool 'panel')}}
+              <div class="howard-forge-panel-tool">
+                {{#if currentPage}}
+
+                {{#if panelImageEditId}}
+                {{!-- Panel Image Editor (inline — replaces panel list) --}}
+                <div class="howard-forge-panel-images-inline" data-panel-id="{{panelImageEditId}}">
+                  <button type="button" class="howard-forge-back-btn howard-panel-images-back">
+                    <i class="fas fa-arrow-left"></i> Panels
+                  </button>
+                  <div class="howard-forge-card-grid">
+                    {{#each currentPanelImages as |img|}}
+                    <div class="howard-forge-card" data-layer-id="{{img.id}}">
+                      <div class="howard-forge-card-thumb">
+                        <img src="{{img.imagePath}}" />
+                      </div>
+                      <div class="howard-forge-card-controls">
+                        <span class="howard-forge-card-layer" title="Layer {{img.layerNum}}">{{img.layerNum}}</span>
+                        <button type="button" class="howard-forge-card-btn howard-pimg-inline-move" title="Move image">
+                          <i class="fas fa-crosshairs"></i>
+                        </button>
+                        <button type="button" class="howard-forge-card-btn howard-pimg-inline-up" title="Layer up">
+                          <i class="fas fa-arrow-up"></i>
+                        </button>
+                        <button type="button" class="howard-forge-card-btn howard-pimg-inline-down" title="Layer down">
+                          <i class="fas fa-arrow-down"></i>
+                        </button>
+                        <button type="button" class="howard-forge-card-btn howard-pimg-inline-delete" title="Delete">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                    {{/each}}
+                  </div>
+                  <button type="button" class="howard-forge-add-btn howard-pimg-inline-add">
+                    <i class="fas fa-plus"></i> Add Image
+                  </button>
+                </div>
+
+                {{else}}
+                {{!-- Panel List (default view) --}}
+                <div class="howard-forge-panel-list {{#if panelToolLocked}}howard-panel-locked{{/if}}">
+                  {{#each currentPanels as |panel|}}
+                  <div class="howard-forge-panel-card" data-panel-id="{{panel.id}}">
+                    <div class="howard-forge-panel-card-preview">
+                      {{#if panel.hasLayers}}
+                      <img src="{{panel.layers.0.imagePath}}" />
+                      {{/if}}
+                    </div>
+                    <div class="howard-forge-panel-card-body">
+                      <span class="howard-forge-card-layer" title="Z-index {{panel.zIndex}}">{{panel.zIndex}}</span>
+                      <button type="button" class="howard-forge-card-btn howard-panel-layer-up" title="Z-index up">
+                        <i class="fas fa-arrow-up"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-panel-layer-down" title="Z-index down">
+                        <i class="fas fa-arrow-down"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-panel-move" title="Move/resize panel">
+                        <i class="fas fa-crosshairs"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-panel-images" title="Manage images">
+                        <i class="fas fa-images"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-panel-transparent-toggle {{#if panel.transparent}}active{{/if}}" title="Toggle transparent (no border/background)">
+                        <i class="fas fa-border-none"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-panel-duplicate" title="Duplicate panel">
+                        <i class="fas fa-clone"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-panel-delete" title="Delete panel">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  {{/each}}
+                  {{!-- Lock card — always last in list --}}
+                  <div class="howard-forge-panel-card howard-panel-lock-card {{#if panelToolLocked}}locked{{/if}}" title="{{#if panelToolLocked}}Unlock panel controls{{else}}Lock panel controls{{/if}}">
+                    <i class="fas {{#if panelToolLocked}}fa-lock{{else}}fa-lock-open{{/if}}"></i>
+                  </div>
+                </div>
+                <button type="button" class="howard-forge-add-btn howard-draw-panel">
+                  <i class="fas fa-vector-square"></i> Draw Panel
+                </button>
+                {{/if}}
+
+                {{else}}
+                <div class="howard-forge-empty">Add a page first</div>
+                {{/if}}
+              </div>
+              {{/if}}
+
+              {{!-- TEXT Tool: freeform text boxes --}}
+              {{#if (eq forgeTool 'text')}}
+              <div class="howard-forge-text-tool">
+                {{#if currentPage}}
+
+                {{#if textEditId}}
+                {{!-- Text Editor (inline — replaces text list) --}}
+                <div class="howard-forge-text-editor-inline" data-tb-id="{{textEditId}}">
+                  <button type="button" class="howard-forge-back-btn howard-text-edit-back">
+                    <i class="fas fa-arrow-left"></i> Text Boxes
+                  </button>
+                  <textarea class="howard-text-edit-area" placeholder="Enter text...">{{textEditContent}}</textarea>
+                  <button type="button" class="howard-forge-add-btn howard-text-edit-save">
+                    <i class="fas fa-check"></i> Save
+                  </button>
+                </div>
+
+                {{else}}
+                {{!-- Text Block List (default view) --}}
+                <div class="howard-forge-text-list {{#if textToolLocked}}howard-text-locked{{/if}}">
+                  {{#each currentTextBlocks as |tb|}}
+                  <div class="howard-forge-text-card" data-tb-id="{{tb.id}}">
+                    <div class="howard-forge-text-card-preview">{{tb.preview}}</div>
+                    <div class="howard-forge-text-card-body">
+                      <span class="howard-forge-card-layer" title="Z-index {{tb.zIndex}}">{{tb.zIndex}}</span>
+                      <button type="button" class="howard-forge-card-btn howard-text-layer-up" title="Z-index up">
+                        <i class="fas fa-arrow-up"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-text-layer-down" title="Z-index down">
+                        <i class="fas fa-arrow-down"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-text-move" title="Move / Shift+drag resize">
+                        <i class="fas fa-crosshairs"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-text-edit" title="Edit text">
+                        <i class="fas fa-pen"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-text-transparent-toggle {{#if tb.transparent}}active{{/if}}" title="Toggle transparent (no border/background)">
+                        <i class="fas fa-border-none"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-text-delete" title="Delete">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  {{/each}}
+                  {{!-- Lock card — always last --}}
+                  <div class="howard-forge-text-card howard-text-lock-card {{#if textToolLocked}}locked{{/if}}" title="{{#if textToolLocked}}Unlock text controls{{else}}Lock text controls{{/if}}">
+                    <i class="fas {{#if textToolLocked}}fa-lock{{else}}fa-lock-open{{/if}}"></i>
+                  </div>
+                </div>
+                <button type="button" class="howard-forge-add-btn howard-draw-text {{#if textToolLocked}}howard-btn-locked{{/if}}">
+                  <i class="fas fa-vector-square"></i> Draw Text Box
+                </button>
+                {{/if}}
+
+                {{else}}
+                <div class="howard-forge-empty">Add a page first</div>
+                {{/if}}
+              </div>
+              {{/if}}
+
+              {{!-- ====== SPEECH TOOL ====== --}}
+              {{#if (eq forgeTool 'speech')}}
+              <div class="howard-forge-speech-tool">
+                {{#if currentPage}}
+
+                {{#if speechEditId}}
+                {{!-- Speech Editor (inline — replaces speech list) --}}
+                <div class="howard-forge-speech-editor-inline" data-sb-id="{{speechEditId}}">
+                  <button type="button" class="howard-forge-back-btn howard-speech-edit-back">
+                    <i class="fas fa-arrow-left"></i> Speech Bubbles
+                  </button>
+                  <textarea class="howard-speech-edit-area" placeholder="Enter speech...">{{speechEditContent}}</textarea>
+                  <button type="button" class="howard-forge-add-btn howard-speech-edit-save">
+                    <i class="fas fa-check"></i> Save
+                  </button>
+                </div>
+
+                {{else}}
+                {{!-- Speech Bubble List (default view) --}}
+                <div class="howard-forge-speech-list {{#if speechToolLocked}}howard-speech-locked{{/if}}">
+                  {{#each currentSpeechBubbles as |sb|}}
+                  <div class="howard-forge-speech-card" data-sb-id="{{sb.id}}">
+                    <div class="howard-forge-speech-card-preview">{{sb.preview}}</div>
+                    <div class="howard-forge-speech-card-body">
+                      <span class="howard-forge-card-layer" title="Z-index {{sb.zIndex}}">{{sb.zIndex}}</span>
+                      <button type="button" class="howard-forge-card-btn howard-speech-layer-up" title="Z-index up">
+                        <i class="fas fa-arrow-up"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-speech-layer-down" title="Z-index down">
+                        <i class="fas fa-arrow-down"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-speech-move" title="Move / Shift+drag resize">
+                        <i class="fas fa-crosshairs"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-speech-aim" title="Click to aim tail">
+                        <i class="fas fa-location-arrow"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-speech-edit" title="Edit text">
+                        <i class="fas fa-pen"></i>
+                      </button>
+                      <button type="button" class="howard-forge-card-btn howard-speech-delete" title="Delete">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  {{/each}}
+                  {{!-- Lock card — always last --}}
+                  <div class="howard-forge-speech-card howard-speech-lock-card {{#if speechToolLocked}}locked{{/if}}" title="{{#if speechToolLocked}}Unlock speech controls{{else}}Lock speech controls{{/if}}">
+                    <i class="fas {{#if speechToolLocked}}fa-lock{{else}}fa-lock-open{{/if}}"></i>
+                  </div>
+                </div>
+                <button type="button" class="howard-forge-add-btn howard-draw-speech {{#if speechToolLocked}}howard-btn-locked{{/if}}">
+                  <i class="fas fa-vector-square"></i> Draw Speech Bubble
+                </button>
+                {{/if}}
+
+                {{else}}
+                <div class="howard-forge-empty">Add a page first</div>
+                {{/if}}
+              </div>
+              {{/if}}
+
+            </div>
+
+          </div>
+          {{/if}}
+
+        </div>
+        {{/unless}}
+        {{/if}}
+
+      </div>
+
+      {{else}}
+      {{!-- ========================== --}}
+      {{!-- RACK MODE (existing)       --}}
+      {{!-- ========================== --}}
+
+      {{#if isEmpty}}
+      <div class="howard-empty-state">
+        <div class="howard-placeholder">
+          <div class="howard-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+              <path d="M7 17h10v-2H7v2zm0-4h10v-2H7v2zm0-4h10V7H7v2z"/>
+            </svg>
+          </div>
+          <h2>The Chronicle Awaits</h2>
+          <p class="howard-quote">"Know, O prince, that between the years when the oceans drank Atlantis..."</p>
+          {{#if isGM}}
+          <button type="button" class="howard-add-first-tale">
+            <i class="fas fa-plus"></i>
+            <span>Forge Your First Tale</span>
+          </button>
+          {{else}}
+          <p class="howard-hint">This is where your adventures are recorded for all time.</p>
+          {{/if}}
+        </div>
+      </div>
+
+      {{else}}
+      <div class="howard-rack-wrapper">
+        <div class="howard-rack" tabindex="0">
+
+          {{#if showArrows}}
+          <button type="button" class="howard-rack-arrow howard-rack-arrow-left" aria-label="Previous issue">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          {{/if}}
+
+          <div class="howard-rack-viewport">
+            <div class="howard-rack-track">
+              {{!-- JS populates cover cards here --}}
+            </div>
+          </div>
+
+          {{#if showArrows}}
+          <button type="button" class="howard-rack-arrow howard-rack-arrow-right" aria-label="Next issue">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+          {{/if}}
+
+        </div>
+
+        {{!-- View button centered under the rack --}}
+        <div class="howard-rack-view-row">
+          <button type="button" class="howard-view-btn">View</button>
+        </div>
+      </div>
+
+      {{/if}}
+
+      {{/if}}
+    </main>
+
+    {{!-- Footer --}}
+    <footer class="howard-footer">
+      {{#unless inReaderMode}}
+      <span class="howard-footer-spacer"></span>
+      <span class="howard-footer-right">
+        {{#if isGM}}
+          {{#unless isEmpty}}
+          <button type="button" class="howard-footer-btn howard-change-cover-btn" title="Change cover art">
+            <i class="fas fa-image"></i>
+          </button>
+          <button type="button" class="howard-footer-btn howard-edit-tale-btn">
+            <i class="fas fa-hammer"></i> Forge
+          </button>
+          {{/unless}}
+          <span class="mode-badge gm">GM Mode</span>
+        {{else}}
+          <span class="mode-badge player">Player Mode</span>
+        {{/if}}
+      </span>
+      {{/unless}}
+    </footer>
+
+  </div>
+</form>

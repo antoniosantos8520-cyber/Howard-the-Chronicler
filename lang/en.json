@@ -1,0 +1,12 @@
+{
+  "HOWARD": {
+    "Title": "Howard the Chronicler",
+    "SheetLabel": "Howard the Chronicler",
+    "ActorType": "Chronicler"
+  },
+  "TYPES": {
+    "Actor": {
+      "howard": "Chronicler"
+    }
+  }
+}

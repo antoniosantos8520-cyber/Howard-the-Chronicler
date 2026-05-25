@@ -1,0 +1,32 @@
+{
+  "id": "howard-chronicler",
+  "title": "Howard the Chronicler",
+  "description": "A visual storytelling tool for Foundry VTT. Build comic-style tale pages with panels, text blocks, speech bubbles, and skill markers. Present stories to players with reveal-by-reveal presentation mode, zoom, and hidden pages.",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "14"
+  },
+  "authors": [
+    {
+      "name": "Anton"
+    }
+  ],
+  "esmodules": ["module/howard-init.js"],
+  "styles": ["css/howard.css"],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "documentTypes": {
+    "Actor": {
+      "howard": {}
+    }
+  },
+  "url": "https://github.com/antoniosantos8520-cyber/Howard-the-Chronicler",
+  "manifest": "https://raw.githubusercontent.com/antoniosantos8520-cyber/Howard-the-Chronicler/main/module.json",
+  "download": "https://github.com/antoniosantos8520-cyber/Howard-the-Chronicler/releases/download/v0.1.0/howard-chronicler.zip"
+}
