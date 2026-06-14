@@ -11,20 +11,20 @@
         </div>
         {{#if isGM}}
         <div class="howard-header-actions">
-          <button type="button" class="howard-header-btn howard-add-tale-btn">
-            <i class="fas fa-plus"></i> New Tale
+          <button type="button" class="howard-header-btn howard-add-tale-btn" title="New Tale">
+            <i class="fas fa-plus"></i>
           </button>
           {{#unless isEmpty}}
-          <button type="button" class="howard-header-btn howard-delete-tale-btn">
-            <i class="fas fa-trash"></i> Delete Tale
+          <button type="button" class="howard-header-btn howard-delete-tale-btn" title="Delete Tale">
+            <i class="fas fa-trash"></i>
           </button>
           <button type="button" class="howard-header-btn howard-export-btn" title="Export tale as PDF">
-            <i class="fas fa-file-pdf"></i> Export
+            <i class="fas fa-file-export"></i>
           </button>
           {{/unless}}
           {{#if canUndoTale}}
           <button type="button" class="howard-header-btn howard-undo-tale-btn" title="Restore deleted tale">
-            <i class="fas fa-undo"></i> Undo
+            <i class="fas fa-undo"></i>
           </button>
           {{/if}}
         </div>
@@ -57,6 +57,9 @@
           </button>
           <button type="button" class="howard-topbar-btn howard-pres-rollcall-btn" title="Roll Call — ad-hoc skill check">
             <i class="fas fa-dice-d20"></i>
+          </button>
+          <button type="button" class="howard-topbar-btn howard-the-chronicler-btn" title="Theater — project to canvas">
+            <i class="fas fa-theater-masks"></i> Theater
           </button>
           {{else}}
           <button type="button" class="howard-topbar-btn howard-play-btn" title="Switch to Presentation mode">
@@ -136,7 +139,7 @@
             {{#each currentPanels as |panel|}}
             <div class="howard-panel howard-panel-freeform {{#if panel.transparent}}howard-panel-transparent{{/if}} {{#if panel.isHiddenForPresentation}}howard-pres-hidden{{/if}} {{#if panel.isRevealed}}howard-panel-revealed{{/if}}"
                  data-panel-id="{{panel.id}}"
-                 style="left: {{panel.x}}%; top: {{panel.y}}%; width: {{panel.width}}%; height: {{panel.height}}%; z-index: {{panel.zIndex}};">
+                 style="left: {{panel.x}}%; top: {{panel.y}}%; width: {{panel.width}}%; height: {{panel.height}}%; z-index: {{panel.zIndex}}; transform: rotate({{panel.rotation}}deg);">
 
               {{!-- Panel image layers --}}
               {{#if panel.hasLayers}}
@@ -151,10 +154,8 @@
                 <div class="howard-panel-content">{{panel.content}}</div>
               </div>
               {{/if}}
-              {{#unless ../isPlayMode}}{{#if panel.isHidden}}<div class="howard-hidden-eye"><i class="fas fa-eye-slash"></i></div>{{/if}}{{/unless}}
-              {{#if ../isPlayMode}}<div class="howard-pres-controls">
+              {{#if ../isGM}}<div class="howard-pres-controls">
                 <button type="button" class="howard-pres-ctrl howard-pres-eye" title="Toggle visibility"><i class="fas {{#if panel.isHidden}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button>
-                <button type="button" class="howard-pres-ctrl howard-pres-zoom" title="Zoom"><i class="fas fa-search-plus"></i></button>
               </div>{{/if}}
             </div>
             {{/each}}
@@ -163,9 +164,8 @@
             {{#each currentTextBlocks as |tb|}}
             <div class="howard-text-block howard-text-freeform {{#if tb.transparent}}howard-tb-transparent{{/if}} {{#if tb.isHiddenForPresentation}}howard-pres-hidden{{/if}} {{#if tb.isRevealed}}howard-tb-revealed{{/if}}" data-tb-id="{{tb.id}}"
                  style="left: {{tb.x}}%; top: {{tb.y}}%; width: {{tb.width}}%; height: {{tb.height}}%; z-index: {{tb.zIndex}};">
-              <div class="howard-text-block-content howard-tb-style-{{tb.style}}">{{tb.content}}</div>
-              {{#unless ../isPlayMode}}{{#if tb.isHidden}}<div class="howard-hidden-eye"><i class="fas fa-eye-slash"></i></div>{{/if}}{{/unless}}
-              {{#if ../isPlayMode}}<div class="howard-pres-controls">
+              <div class="howard-text-block-content howard-tb-style-{{tb.style}}" style="font-size: {{tb.fontSize}}px;">{{tb.content}}</div>
+              {{#if ../isGM}}<div class="howard-pres-controls">
                 <button type="button" class="howard-pres-ctrl howard-pres-eye" title="Toggle visibility"><i class="fas {{#if tb.isHidden}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button>
               </div>{{/if}}
             </div>
@@ -176,7 +176,7 @@
               {{#each currentSpeechBubbles as |sb|}}
               {{#if sb.tailPoints}}
               <polygon data-sb-id="{{sb.id}}" points="{{sb.tailPoints}}"
-                       fill="#fff" stroke="#333" stroke-width="0.4"
+                       fill="#fff" stroke="#333" stroke-width="0.4" stroke-linejoin="round"
                        {{#if sb.isHiddenForPresentation}}class="howard-pres-hidden-svg"{{/if}} />
               {{/if}}
               {{/each}}
@@ -186,9 +186,8 @@
             {{#each currentSpeechBubbles as |sb|}}
             <div class="howard-speech-bubble howard-speech-freeform {{#if sb.isHiddenForPresentation}}howard-pres-hidden{{/if}}" data-sb-id="{{sb.id}}"
                  style="left: {{sb.x}}%; top: {{sb.y}}%; width: {{sb.width}}%; height: {{sb.height}}%; z-index: {{sb.zIndex}};">
-              <div class="howard-speech-bubble-content">{{sb.content}}</div>
-              {{#unless ../isPlayMode}}{{#if sb.isHidden}}<div class="howard-hidden-eye"><i class="fas fa-eye-slash"></i></div>{{/if}}{{/unless}}
-              {{#if ../isPlayMode}}<div class="howard-pres-controls">
+              <div class="howard-speech-bubble-content" style="font-size: {{sb.fontSize}}px;">{{sb.content}}</div>
+              {{#if ../isGM}}<div class="howard-pres-controls">
                 <button type="button" class="howard-pres-ctrl howard-pres-eye" title="Toggle visibility"><i class="fas {{#if sb.isHidden}}fa-eye-slash{{else}}fa-eye{{/if}}"></i></button>
               </div>{{/if}}
             </div>
@@ -199,7 +198,7 @@
             {{#each currentChecks as |chk|}}
             <div class="howard-check-marker {{#if chk.fired}}howard-check-fired{{/if}}" data-check-id="{{chk.id}}"
                  style="left: {{chk.posX}}%; top: {{chk.posY}}%;"
-                 title="{{chk.skillName}} DC {{chk.dc}}">
+                 title="{{chk.skillName}} DC {{chk.dc}}{{#if chk.description}} — {{chk.description}}{{/if}}">
               <i class="fas fa-dice-d20"></i>
             </div>
             {{/each}}
@@ -294,7 +293,18 @@
                     <label style="width:40px;font-size:11px;">DC</label>
                     <input type="number" class="howard-check-edit-dc" value="{{checkEditData.dc}}" min="1" max="30" style="width:60px;" />
                   </div>
-                  <textarea class="howard-check-edit-prompt" rows="3" placeholder="Description...">{{checkEditData.prompt}}</textarea>
+                  <div style="margin-bottom:4px;">
+                    <label style="font-size:11px;">Description <span style="color:#666;font-weight:400;">(shown to players)</span></label>
+                    <textarea class="howard-check-edit-description" rows="2" placeholder="Flavor text shown to players...">{{checkEditData.description}}</textarea>
+                  </div>
+                  <div style="margin-bottom:4px;">
+                    <label style="font-size:11px;">Success</label>
+                    <textarea class="howard-check-edit-prompt" rows="2" placeholder="Revealed on success...">{{checkEditData.prompt}}</textarea>
+                  </div>
+                  <div>
+                    <label style="font-size:11px;">Fail <span style="color:#666;font-weight:400;">(blank = auto-generated)</span></label>
+                    <textarea class="howard-check-edit-failtext" rows="2" placeholder="Leave blank for auto-generated...">{{checkEditData.failText}}</textarea>
+                  </div>
                 </div>
                 <div class="howard-check-edit-actions">
                   <button type="button" class="howard-forge-card-btn howard-check-edit-move" title="Move on page">
@@ -314,7 +324,7 @@
               <div class="howard-check-icon-row">
                 {{#each currentChecks as |check|}}
                 <div class="howard-check-icon {{#if check.fired}}howard-check-icon-fired{{/if}}" data-check-id="{{check.id}}"
-                     title="{{check.skillName}} DC {{check.dc}}">
+                     title="{{check.skillName}} DC {{check.dc}}{{#if check.description}} — {{check.description}}{{/if}}">
                   <i class="fas fa-dice-d20"></i>
                 </div>
                 {{/each}}
@@ -505,10 +515,17 @@
                   <button type="button" class="howard-forge-back-btn howard-text-edit-back">
                     <i class="fas fa-arrow-left"></i> Text Boxes
                   </button>
-                  <textarea class="howard-text-edit-area" placeholder="Enter text...">{{textEditContent}}</textarea>
-                  <button type="button" class="howard-forge-add-btn howard-text-edit-save">
-                    <i class="fas fa-check"></i> Save
-                  </button>
+                  <textarea class="howard-text-edit-area" placeholder="Enter text... (Shift+scroll to resize)">{{textEditContent}}</textarea>
+                  <div class="howard-text-edit-footer">
+                    <div class="howard-text-fontsize-ctrl">
+                      <button type="button" class="howard-forge-card-btn howard-text-font-down" title="Decrease font size">A−</button>
+                      <span class="howard-text-fontsize-display">{{textEditFontSize}}px</span>
+                      <button type="button" class="howard-forge-card-btn howard-text-font-up" title="Increase font size">A+</button>
+                    </div>
+                    <button type="button" class="howard-forge-add-btn howard-text-edit-save">
+                      <i class="fas fa-check"></i> Save
+                    </button>
+                  </div>
                 </div>
 
                 {{else}}
@@ -567,10 +584,17 @@
                   <button type="button" class="howard-forge-back-btn howard-speech-edit-back">
                     <i class="fas fa-arrow-left"></i> Speech Bubbles
                   </button>
-                  <textarea class="howard-speech-edit-area" placeholder="Enter speech...">{{speechEditContent}}</textarea>
-                  <button type="button" class="howard-forge-add-btn howard-speech-edit-save">
-                    <i class="fas fa-check"></i> Save
-                  </button>
+                  <textarea class="howard-speech-edit-area" placeholder="Enter speech... (Shift+scroll to resize)">{{speechEditContent}}</textarea>
+                  <div class="howard-text-edit-footer">
+                    <div class="howard-text-fontsize-ctrl">
+                      <button type="button" class="howard-forge-card-btn howard-speech-font-down" title="Decrease font size">A−</button>
+                      <span class="howard-text-fontsize-display">{{speechEditFontSize}}px</span>
+                      <button type="button" class="howard-forge-card-btn howard-speech-font-up" title="Increase font size">A+</button>
+                    </div>
+                    <button type="button" class="howard-forge-add-btn howard-speech-edit-save">
+                      <i class="fas fa-check"></i> Save
+                    </button>
+                  </div>
                 </div>
 
                 {{else}}
@@ -698,13 +722,19 @@
       <span class="howard-footer-right">
         {{#if isGM}}
           {{#unless isEmpty}}
-          <button type="button" class="howard-footer-btn howard-change-cover-btn" title="Change cover art">
-            <i class="fas fa-image"></i>
+          <button type="button" class="howard-footer-btn howard-edit-tale-info-btn" title="Edit tale info">
+            <i class="fas fa-pencil-alt"></i>
+          </button>
+          <button type="button" class="howard-footer-btn howard-export-tale-btn" title="Export tale to file">
+            <i class="fas fa-file-export"></i>
           </button>
           <button type="button" class="howard-footer-btn howard-edit-tale-btn">
             <i class="fas fa-hammer"></i> Forge
           </button>
           {{/unless}}
+          <button type="button" class="howard-footer-btn howard-import-tale-btn" title="Import tale from file">
+            <i class="fas fa-file-import"></i>
+          </button>
           <span class="mode-badge gm">GM Mode</span>
         {{else}}
           <span class="mode-badge player">Player Mode</span>

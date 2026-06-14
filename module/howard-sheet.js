@@ -3,16 +3,6 @@
  * Named after Robert E. Howard, creator of Conan
  */
 
-const PAGE_TEMPLATES = {
-  splash:       { label: "Splash",      icon: "fa-expand",       slots: 1, description: "1 giant panel" },
-  cinematic:    { label: "Cinematic",    icon: "fa-film",         slots: 3, description: "3 horizontal strips" },
-  standard:     { label: "Standard",     icon: "fa-th-large",     slots: 6, description: "Classic 6-panel grid" },
-  dense:        { label: "Dense",        icon: "fa-th",           slots: 9, description: "9-panel grid" },
-  split:        { label: "Split",        icon: "fa-columns",      slots: 2, description: "2 vertical halves" },
-  lshape:       { label: "L-Shape",      icon: "fa-puzzle-piece", slots: 3, description: "1 large + 2 stacked" },
-  "stat-block": { label: "Stat Block",   icon: "fa-scroll",       slots: 1, description: "Formatted stat layout" },
-  handout:      { label: "Handout",      icon: "fa-file-alt",     slots: 1, description: "Full-page handout" }
-};
 
 const PANEL_TYPES = {
   narration:     { label: "Narration",    icon: "fa-italic" },
@@ -133,10 +123,10 @@ export default class HowardSheet extends ActorSheet {
   static get defaultOptions() {
     const isGM = game.user?.isGM ?? true;
     return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["howard-chronicler", "sheet", "howard"],
-      template: "modules/howard-chronicler/templates/howard-sheet.hbs",
-      width: isGM ? 1200 : 275,
-      height: isGM ? 860 : 440,
+      classes: ["howard-the-chronicler", "sheet", "howard"],
+      template: "modules/howard-the-chronicler/templates/howard-sheet.hbs",
+      width: isGM ? 640 : 275,
+      height: isGM ? 750 : 440,
       top: isGM ? undefined : 10,
       left: isGM ? undefined : 10,
       tabs: [],
@@ -166,13 +156,14 @@ export default class HowardSheet extends ActorSheet {
   /** Add a back-to-rack button in the window title bar for players */
   _getHeaderButtons() {
     const buttons = super._getHeaderButtons();
-    // Remove text labels from close button (X only)
-    const closeBtn = buttons.find(b => b.class === 'close');
+    // Keep only the close button — remove compendium, sheet, token, configure, etc.
+    const filtered = buttons.filter(b => b.class === 'close');
+    const closeBtn = filtered.find(b => b.class === 'close');
     if (closeBtn) closeBtn.label = '';
 
     // Add back button when in reader mode
     if (this._viewMode === 'reader') {
-      buttons.unshift({
+      filtered.unshift({
         class: 'howard-header-back',
         icon: 'fas fa-arrow-left',
         label: '',
@@ -184,7 +175,7 @@ export default class HowardSheet extends ActorSheet {
         }
       });
     }
-    return buttons;
+    return filtered;
   }
 
   getData() {
@@ -268,7 +259,7 @@ export default class HowardSheet extends ActorSheet {
         // Cover page detection
         context.isCoverPage = this._readerPageIndex === -1;
         if (context.isCoverPage) {
-          context.coverImage = tale.coverImage || 'modules/howard-chronicler/images/howard.png';
+          context.coverImage = tale.coverImage || 'modules/howard-the-chronicler/images/howard.png';
           context.currentPage = null;
           context.currentPageIndex = -1;
         } else {
@@ -310,6 +301,7 @@ export default class HowardSheet extends ActorSheet {
               width: p.width ?? 100,
               height: p.height ?? 100,
               zIndex: p.zIndex ?? 10,
+              rotation: p.rotation ?? 0,
               transparent: !!p.transparent,
               hasContent: !!(p.content?.trim()),
               layers: panelLayers,
@@ -365,6 +357,7 @@ export default class HowardSheet extends ActorSheet {
               content: tb.content || '',
               style: tb.style || 'caption',
               transparent: !!tb.transparent,
+              fontSize: tb.fontSize ?? 14,
               hasContent: !!(tb.content?.trim()),
               preview: (tb.content || '').substring(0, 40) || '(empty)'
             }))
@@ -374,6 +367,7 @@ export default class HowardSheet extends ActorSheet {
           // Text edit content for inline editor
           if (this._textEditId && textBlocksObj[this._textEditId]) {
             context.textEditContent = textBlocksObj[this._textEditId].content || '';
+            context.textEditFontSize = textBlocksObj[this._textEditId].fontSize ?? 14;
           } else if (this._textEditId) {
             this._textEditId = null;
           }
@@ -458,6 +452,7 @@ export default class HowardSheet extends ActorSheet {
               height: sb.height ?? 10,
               zIndex: sb.zIndex ?? 15,
               content: sb.content || '',
+              fontSize: sb.fontSize ?? 13,
               hasContent: !!(sb.content?.trim()),
               preview: (sb.content || '').substring(0, 40) || '(empty)',
               tailPoints: this._computeTailGeometry(sb),
@@ -507,6 +502,7 @@ export default class HowardSheet extends ActorSheet {
           const sbObjGm = context.currentPage.speechBubbles || {};
           if (this._speechEditId && sbObjGm[this._speechEditId]) {
             context.speechEditContent = sbObjGm[this._speechEditId].content || '';
+            context.speechEditFontSize = sbObjGm[this._speechEditId].fontSize ?? 13;
           } else if (this._speechEditId) {
             this._speechEditId = null;
           }
@@ -528,6 +524,21 @@ export default class HowardSheet extends ActorSheet {
 
   activateListeners(html) {
     super.activateListeners(html);
+
+    // Restore scroll positions after page-strip navigation.
+    // Deferred to next frame so browser auto-scroll (focus restore) runs first.
+    if (this._gmPanelScroll != null || this._windowContentScroll != null) {
+      const savedGm = this._gmPanelScroll;
+      const savedWc = this._windowContentScroll;
+      const panel = html.find('.howard-gm-panel, .howard-forge-panel')[0];
+      const wc = html[0]?.closest('.window-content');
+      this._gmPanelScroll = null;
+      this._windowContentScroll = null;
+      requestAnimationFrame(() => {
+        if (savedGm != null && panel) panel.scrollTop = savedGm;
+        if (savedWc != null && wc) wc.scrollTop = savedWc;
+      });
+    }
 
     // Add player-view class to the window wrapper so CSS can target the header
     const appEl = this.element?.[0]?.closest('.app');
@@ -598,19 +609,79 @@ export default class HowardSheet extends ActorSheet {
     html.find('.howard-undo-tale-btn').click(() => this._onUndoDeleteTale());
     html.find('.howard-export-btn').click(() => this._onExportPDF());
 
-    // Footer cover art picker — changes cover of currently centered tale
-    html.find('.howard-change-cover-btn').click(() => {
+    // Footer edit tale info — change title, issue number, and cover of currently centered tale
+    html.find('.howard-edit-tale-info-btn').click(() => {
       if (count === 0) return;
       const idx = count < 3 ? 0 : this._currentIndex;
       const tale = talesList[idx];
       if (!tale) return;
-      new FilePicker({
-        type: "image",
-        current: tale.coverImage || "modules/howard-chronicler/images/Tales/",
-        callback: (path) => {
-          this.actor.update({ [`system.tales.${tale.id}.coverImage`]: path });
+      const content = `
+        <div class="howard-dialog">
+          <div class="howard-form-group">
+            <label>Issue Number</label>
+            <input type="number" name="issueNumber" value="${tale.issueNumber}" min="1" />
+          </div>
+          <div class="howard-form-group">
+            <label>Title</label>
+            <input type="text" name="title" value="${this._escHtml(tale.title)}" />
+          </div>
+          <div class="howard-form-group">
+            <label>Cover Image</label>
+            <div class="howard-cover-preview" data-action="pick-cover">
+              ${tale.coverImage ? `<img src="${tale.coverImage}">` : '<span class="placeholder-icon"><i class="fas fa-image"></i></span>'}
+            </div>
+            <input type="hidden" name="coverImage" value="${tale.coverImage || ''}" />
+          </div>
+        </div>
+      `;
+      new Dialog({
+        title: "Edit Tale",
+        content,
+        buttons: {
+          save: {
+            icon: '<i class="fas fa-check"></i>',
+            label: "Save",
+            callback: (html) => {
+              const title = html.find('input[name="title"]').val().trim() || tale.title;
+              const issueNumber = parseInt(html.find('input[name="issueNumber"]').val()) || tale.issueNumber;
+              const coverImage = html.find('input[name="coverImage"]').val();
+              this.actor.update({
+                [`system.tales.${tale.id}.title`]: title,
+                [`system.tales.${tale.id}.issueNumber`]: issueNumber,
+                [`system.tales.${tale.id}.coverImage`]: coverImage
+              });
+            }
+          },
+          cancel: { icon: '<i class="fas fa-times"></i>', label: "Cancel" }
+        },
+        default: "save",
+        render: (html) => {
+          html.find('.howard-cover-preview').click(() => {
+            new FilePicker({
+              type: "image",
+              current: html.find('input[name="coverImage"]').val() || "modules/howard-the-chronicler/images/Tales/",
+              callback: (path) => {
+                html.find('input[name="coverImage"]').val(path);
+                html.find('.howard-cover-preview').html(`<img src="${path}">`);
+              }
+            }).render(true);
+          });
         }
-      }).render(true);
+      }, { classes: ["dialog", "howard-dialog-window"], width: 350 }).render(true);
+    });
+
+    // Footer export tale button
+    html.find('.howard-export-tale-btn').click(() => {
+      if (count === 0) return;
+      const idx = count < 3 ? 0 : this._currentIndex;
+      const tale = talesList[idx];
+      if (!tale) return;
+      this._onExportTale(tale);
+    });
+
+    // Footer import tale button
+    html.find('.howard-import-tale-btn').click(() => {
+      this._onImportTale();
     });
 
     // Footer Forge button — opens currently centered tale (GM only)
@@ -700,6 +771,9 @@ export default class HowardSheet extends ActorSheet {
     // Presentation: Roll Call — ad-hoc skill check dialog
     html.find('.howard-pres-rollcall-btn').click(() => this._onRollCall());
 
+    // Presentation: Theater — activate Theater scene and/or publish current page
+    html.find('.howard-the-chronicler-btn').click(() => this._onTheaterButton());
+
     // Presentation: Per-element eye icon — toggle visibility + broadcast
     html.find('.howard-pres-eye').click((ev) => {
       ev.stopPropagation();
@@ -710,14 +784,6 @@ export default class HowardSheet extends ActorSheet {
       this._presToggleElement(elId);
     });
 
-    // Presentation: Per-element magnifying glass — zoom + broadcast
-    html.find('.howard-pres-zoom').click((ev) => {
-      ev.stopPropagation();
-      ev.preventDefault();
-      const container = $(ev.currentTarget).closest('.howard-panel-freeform, .howard-text-freeform, .howard-speech-bubble');
-      this._presZoomElement(container);
-    });
-
     // Page navigation arrows
     html.find('.howard-page-prev').click(() => this._navigatePage(-1));
     html.find('.howard-page-next').click(() => this._navigatePage(1));
@@ -726,6 +792,8 @@ export default class HowardSheet extends ActorSheet {
     html.find('.howard-page-strip-item').click((ev) => {
       const idx = parseInt(ev.currentTarget.dataset.pageIndex);
       if (isNaN(idx) || idx === this._readerPageIndex) return;
+      this._gmPanelScroll = html.find('.howard-gm-panel, .howard-forge-panel')[0]?.scrollTop ?? null;
+      this._windowContentScroll = html[0]?.closest('.window-content')?.scrollTop ?? null;
       this._readerPageIndex = idx;
       this.render(false);
     });
@@ -750,10 +818,12 @@ export default class HowardSheet extends ActorSheet {
     if (editorLayout) {
       editorLayout.setAttribute('tabindex', '0');
       editorLayout.addEventListener('keydown', (e) => {
+        const t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
         if (e.key === 'ArrowLeft') { e.preventDefault(); this._navigatePage(-1); }
         if (e.key === 'ArrowRight') { e.preventDefault(); this._navigatePage(1); }
       });
-      editorLayout.focus();
+      editorLayout.focus({ preventScroll: true });
     }
 
     // GM-only: mode toggle and right panel
@@ -1136,6 +1206,40 @@ export default class HowardSheet extends ActorSheet {
         this._textEditId = null;
       });
 
+      // Text editor: font size +/- buttons
+      html.find('.howard-text-font-up, .howard-text-font-down').click((ev) => {
+        const tbId = this._textEditId;
+        if (!tbId) return;
+        const delta = ev.currentTarget.classList.contains('howard-text-font-up') ? 1 : -1;
+        const basePath = this._getPageBasePath();
+        const tb = this._getCurrentPage()?.textBlocks?.[tbId];
+        const current = tb?.fontSize ?? 14;
+        const newSize = Math.max(6, Math.min(72, current + delta));
+        const content = html.find('.howard-text-edit-area').val();
+        this.actor.update({
+          [`${basePath}.textBlocks.${tbId}.fontSize`]: newSize,
+          [`${basePath}.textBlocks.${tbId}.content`]: content
+        });
+      });
+
+      // Text editor: Shift+scroll to resize font
+      html.find('.howard-text-edit-area').on('wheel', (ev) => {
+        if (!ev.shiftKey) return;
+        ev.preventDefault();
+        const tbId = this._textEditId;
+        if (!tbId) return;
+        const delta = ev.originalEvent.deltaY < 0 ? 1 : -1;
+        const basePath = this._getPageBasePath();
+        const tb = this._getCurrentPage()?.textBlocks?.[tbId];
+        const current = tb?.fontSize ?? 14;
+        const newSize = Math.max(6, Math.min(72, current + delta));
+        const content = html.find('.howard-text-edit-area').val();
+        this.actor.update({
+          [`${basePath}.textBlocks.${tbId}.fontSize`]: newSize,
+          [`${basePath}.textBlocks.${tbId}.content`]: content
+        });
+      });
+
       // ====== SPEECH TOOL HANDLERS ======
 
       // Speech lock toggle
@@ -1246,6 +1350,40 @@ export default class HowardSheet extends ActorSheet {
         this._speechEditId = null;
       });
 
+      // Speech editor: font size +/- buttons
+      html.find('.howard-speech-font-up, .howard-speech-font-down').click((ev) => {
+        const sbId = this._speechEditId;
+        if (!sbId) return;
+        const delta = ev.currentTarget.classList.contains('howard-speech-font-up') ? 1 : -1;
+        const basePath = this._getPageBasePath();
+        const sb = this._getCurrentPage()?.speechBubbles?.[sbId];
+        const current = sb?.fontSize ?? 13;
+        const newSize = Math.max(6, Math.min(72, current + delta));
+        const content = html.find('.howard-speech-edit-area').val();
+        this.actor.update({
+          [`${basePath}.speechBubbles.${sbId}.fontSize`]: newSize,
+          [`${basePath}.speechBubbles.${sbId}.content`]: content
+        });
+      });
+
+      // Speech editor: Shift+scroll to resize font
+      html.find('.howard-speech-edit-area').on('wheel', (ev) => {
+        if (!ev.shiftKey) return;
+        ev.preventDefault();
+        const sbId = this._speechEditId;
+        if (!sbId) return;
+        const delta = ev.originalEvent.deltaY < 0 ? 1 : -1;
+        const basePath = this._getPageBasePath();
+        const sb = this._getCurrentPage()?.speechBubbles?.[sbId];
+        const current = sb?.fontSize ?? 13;
+        const newSize = Math.max(6, Math.min(72, current + delta));
+        const content = html.find('.howard-speech-edit-area').val();
+        this.actor.update({
+          [`${basePath}.speechBubbles.${sbId}.fontSize`]: newSize,
+          [`${basePath}.speechBubbles.${sbId}.content`]: content
+        });
+      });
+
       // ====== GM PANEL: ENEMIES ======
 
       // Ensure enemy data is loaded for Conan enemy lookup (optional)
@@ -1337,16 +1475,24 @@ export default class HowardSheet extends ActorSheet {
           content: `
             <form class="howard-check-form" style="display:flex;flex-direction:column;gap:8px;padding:4px;">
               <div style="display:flex;gap:6px;align-items:center;">
-                <label style="width:60px;font-size:12px;">Skill</label>
+                <label style="width:70px;font-size:12px;">Skill</label>
                 <input type="text" name="skillName" placeholder="e.g. Athletics" style="flex:1;" />
               </div>
               <div style="display:flex;gap:6px;align-items:center;">
-                <label style="width:60px;font-size:12px;">DC</label>
+                <label style="width:70px;font-size:12px;">DC</label>
                 <input type="number" name="dc" value="10" min="1" max="30" style="width:60px;" />
               </div>
               <div style="display:flex;gap:6px;align-items:flex-start;">
-                <label style="width:60px;font-size:12px;padding-top:4px;">Success</label>
-                <textarea name="prompt" rows="3" placeholder="Revealed on success..." style="flex:1;resize:vertical;"></textarea>
+                <label style="width:70px;font-size:12px;padding-top:4px;">Description</label>
+                <textarea name="description" rows="2" placeholder="Flavor text shown to players..." style="flex:1;resize:vertical;"></textarea>
+              </div>
+              <div style="display:flex;gap:6px;align-items:flex-start;">
+                <label style="width:70px;font-size:12px;padding-top:4px;">Success</label>
+                <textarea name="prompt" rows="2" placeholder="Revealed on success..." style="flex:1;resize:vertical;"></textarea>
+              </div>
+              <div style="display:flex;gap:6px;align-items:flex-start;">
+                <label style="width:70px;font-size:12px;padding-top:4px;">Fail</label>
+                <textarea name="failText" rows="2" placeholder="Leave blank for auto-generated..." style="flex:1;resize:vertical;"></textarea>
               </div>
             </form>`,
           buttons: {
@@ -1356,8 +1502,10 @@ export default class HowardSheet extends ActorSheet {
                 const skillName = dlg.find('[name="skillName"]').val()?.trim();
                 const dc = parseInt(dlg.find('[name="dc"]').val()) || 10;
                 const prompt = dlg.find('[name="prompt"]').val()?.trim() || '';
+                const description = dlg.find('[name="description"]').val()?.trim() || '';
+                const failText = dlg.find('[name="failText"]').val()?.trim() || '';
                 if (!skillName) return;
-                this._checkPlacePending = { skillName, dc, prompt };
+                this._checkPlacePending = { skillName, dc, prompt, description, failText };
                 setTimeout(() => this._startCheckPlacement(), 100);
               }
             },
@@ -1398,13 +1546,17 @@ export default class HowardSheet extends ActorSheet {
         const skillName = html.find('.howard-check-edit-skill').val()?.trim();
         const dc = parseInt(html.find('.howard-check-edit-dc').val()) || 10;
         const prompt = html.find('.howard-check-edit-prompt').val()?.trim() || '';
+        const description = html.find('.howard-check-edit-description').val()?.trim() || '';
+        const failText = html.find('.howard-check-edit-failtext').val()?.trim() || '';
         if (!skillName) return;
         const basePath = this._getPageBasePath();
         if (basePath) {
           this.actor.update({
             [`${basePath}.checks.${checkId}.skillName`]: skillName,
             [`${basePath}.checks.${checkId}.dc`]: dc,
-            [`${basePath}.checks.${checkId}.prompt`]: prompt
+            [`${basePath}.checks.${checkId}.prompt`]: prompt,
+            [`${basePath}.checks.${checkId}.description`]: description,
+            [`${basePath}.checks.${checkId}.failText`]: failText
           });
         }
         this._checkEditId = null;
@@ -1633,6 +1785,8 @@ export default class HowardSheet extends ActorSheet {
           skillName: pending.skillName,
           dc: pending.dc,
           prompt: pending.prompt,
+          description: pending.description,
+          failText: pending.failText,
           posX: Math.round(posX * 10) / 10,
           posY: Math.round(posY * 10) / 10,
           fired: false
@@ -1749,9 +1903,10 @@ export default class HowardSheet extends ActorSheet {
 
     const check = currentPage.checks[checkId];
 
-    // Howard chat message (announcement only — players roll using their own system)
-    const howardImg = 'modules/howard-chronicler/images/howard.png';
+    // Howard chat message (announcement + description if any)
+    const howardImg = 'modules/howard-the-chronicler/images/howard.png';
     const esc = (s) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const descHtml = check.description ? `<div class="howard-check-description" style="font-style:italic;color:#ccc;font-size:12px;margin-top:6px;">${esc(check.description)}</div>` : '';
     const content = `
       <div class="conan-roll spell-chat-card howard-check-card">
         <div class="spell-chat-header">
@@ -1767,6 +1922,7 @@ export default class HowardSheet extends ActorSheet {
           <div class="spell-chat-meta">
             <strong>${esc(check.skillName)}</strong> &nbsp;|&nbsp; <span style="color: #FFD700;">Difficulty ${check.dc}</span>
           </div>
+          ${descHtml}
         </div>
       </div>
     `;
@@ -1782,14 +1938,9 @@ export default class HowardSheet extends ActorSheet {
     }
   }
 
-  /** Open the GM-only check control dialog */
-  _openCheckDialog(check) {
+  /** Build the inner HTML for the GM check dialog */
+  _buildCheckDialogContent(check) {
     const esc = (s) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
-
-    // Store active check state
-    this._activeCheck = { check, dc: check.dc };
-
-    // Build player rows from active non-GM users with characters
     const players = game.users.filter(u => !u.isGM && u.active && u.character);
     let playerRowsHtml = '';
     if (players.length) {
@@ -1806,8 +1957,7 @@ export default class HowardSheet extends ActorSheet {
     } else {
       playerRowsHtml = '<div class="gm-check-empty">No active players with characters.</div>';
     }
-
-    const dialogContent = `
+    return `
       <div class="gm-check-dialog-body">
         <div class="gm-check-summary">
           <i class="fas fa-dice-d20 gm-check-icon"></i>
@@ -1819,22 +1969,44 @@ export default class HowardSheet extends ActorSheet {
         ${check.prompt ? `<div class="gm-check-section-label">Hidden Success Text</div><div class="gm-check-success-preview">${esc(check.prompt)}</div>` : ''}
         <div class="gm-check-section-label">Players</div>
         <div class="gm-check-player-list">${playerRowsHtml}</div>
-        <button type="button" class="gm-check-reveal-btn"><i class="fas fa-eye"></i> Reveal</button>
+        <div class="gm-check-btn-row">
+          <button type="button" class="gm-check-pass-btn"><i class="fas fa-check"></i> Pass</button>
+          <button type="button" class="gm-check-fail-btn"><i class="fas fa-times"></i> Fail</button>
+        </div>
       </div>`;
+  }
+
+  /** Wire up Pass/Fail button handlers on the check dialog */
+  _wireCheckDialogButtons(html, check, dlg) {
+    html.find('.gm-check-pass-btn').off('click').on('click', () => {
+      this._revealCheckResult(check, dlg, true);
+    });
+    html.find('.gm-check-fail-btn').off('click').on('click', () => {
+      this._revealCheckResult(check, dlg, false);
+    });
+  }
+
+  /** Open the GM-only check control dialog (reuses existing if open) */
+  _openCheckDialog(check) {
+    this._activeCheck = { check, dc: check.dc };
+    const dialogContent = this._buildCheckDialogContent(check);
+
+    // If a dialog is already open, update it in-place
+    if (this._activeCheckDialog?.element?.length) {
+      const dlg = this._activeCheckDialog;
+      dlg.data.title = `${check.skillName} Check — Difficulty ${check.dc}`;
+      dlg.element.find('.window-title').text(dlg.data.title);
+      dlg.element.find('.dialog-content').html(dialogContent);
+      this._wireCheckDialogButtons(dlg.element, check, dlg);
+      return;
+    }
 
     const dlg = new Dialog({
       title: `${check.skillName} Check — Difficulty ${check.dc}`,
       content: dialogContent,
       buttons: {},
       render: (html) => {
-        // Toggle pass/fail on click
-        html.find('.gm-check-toggle').click((ev) => {
-          $(ev.currentTarget).toggleClass('checked');
-        });
-        // Reveal button
-        html.find('.gm-check-reveal-btn').click(() => {
-          this._revealCheckResult(check, dlg);
-        });
+        this._wireCheckDialogButtons(html, check, dlg);
       },
       close: () => { this._activeCheck = null; this._activeCheckDialog = null; }
     }, {
@@ -1848,21 +2020,9 @@ export default class HowardSheet extends ActorSheet {
   }
 
   /** Post the outcome chat message and close the dialog */
-  async _revealCheckResult(check, dlg) {
+  async _revealCheckResult(check, dlg, anyPassed) {
     const esc = (s) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    const howardImg = 'modules/howard-chronicler/images/howard.png';
-
-    // Read who passed/failed from dialog DOM
-    const passed = [];
-    const failed = [];
-    dlg.element.find('.gm-check-player-row').each((i, el) => {
-      const name = $(el).find('.gm-check-player-name').text();
-      const isChecked = $(el).find('.gm-check-toggle').hasClass('checked');
-      if (isChecked) passed.push(name);
-      else failed.push(name);
-    });
-
-    const anyPassed = passed.length > 0;
+    const howardImg = 'modules/howard-the-chronicler/images/howard.png';
 
     // Default fail messages by stat
     const defaultFail = {
@@ -1892,15 +2052,6 @@ export default class HowardSheet extends ActorSheet {
       ]
     };
 
-    // Build name tags
-    let nameTags = '';
-    for (const n of passed) {
-      nameTags += `<span class="howard-outcome-tag pass"><i class="fas fa-check"></i> ${esc(n)}</span>`;
-    }
-    for (const n of failed) {
-      nameTags += `<span class="howard-outcome-tag fail"><i class="fas fa-times"></i> ${esc(n)}</span>`;
-    }
-
     // Success or fail text
     let outcomeHtml = '';
     if (anyPassed) {
@@ -1924,7 +2075,6 @@ export default class HowardSheet extends ActorSheet {
           <div class="howard-outcome-title"><strong>${esc(check.skillName)}</strong> Check — ${anyPassed ? 'Resolved' : 'Failed'}</div>
         </div>
         <div class="howard-outcome-body">
-          <div class="howard-outcome-names">${nameTags}</div>
           ${outcomeHtml}
         </div>
       </div>`;
@@ -1933,8 +2083,6 @@ export default class HowardSheet extends ActorSheet {
       content,
       speaker: { alias: "Howard the Chronicler" }
     });
-
-    dlg.close();
   }
 
   /* ------------------------------------------ */
@@ -2314,73 +2462,141 @@ export default class HowardSheet extends ActorSheet {
     panelEl.style.cursor = 'grab';
     panelEl.classList.add('howard-panel-highlight');
 
+    // Body drag = MOVE only (Shift+drag resize removed in favor of a handle)
     const onMouseDown = (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
 
       const pageEl = panelEl.closest('.howard-page');
       const pageRect = pageEl.getBoundingClientRect();
-
       const startX = parseFloat(panelEl.style.left) || 0;
       const startY = parseFloat(panelEl.style.top) || 0;
-      const startW = parseFloat(panelEl.style.width) || 30;
-      const startH = parseFloat(panelEl.style.height) || 30;
       const startMouseX = ev.clientX;
       const startMouseY = ev.clientY;
-      const isResize = ev.shiftKey;
-
-      panelEl.style.cursor = isResize ? 'nwse-resize' : 'grabbing';
+      panelEl.style.cursor = 'grabbing';
 
       const onMove = (e) => {
-        const dx = e.clientX - startMouseX;
-        const dy = e.clientY - startMouseY;
-        if (isResize) {
-          // Shift+drag = resize width/height
-          const newW = Math.max(5, startW + (dx / pageRect.width) * 100);
-          const newH = Math.max(5, startH + (dy / pageRect.height) * 100);
-          panelEl.style.width = `${newW.toFixed(1)}%`;
-          panelEl.style.height = `${newH.toFixed(1)}%`;
-        } else {
-          // Normal drag = move
-          const newX = Math.max(-50, Math.min(150, startX + (dx / pageRect.width) * 100));
-          const newY = Math.max(-50, Math.min(150, startY + (dy / pageRect.height) * 100));
-          panelEl.style.left = `${newX.toFixed(1)}%`;
-          panelEl.style.top = `${newY.toFixed(1)}%`;
-        }
+        const newX = Math.max(-50, Math.min(150, startX + ((e.clientX - startMouseX) / pageRect.width) * 100));
+        const newY = Math.max(-50, Math.min(150, startY + ((e.clientY - startMouseY) / pageRect.height) * 100));
+        panelEl.style.left = `${newX.toFixed(1)}%`;
+        panelEl.style.top = `${newY.toFixed(1)}%`;
       };
-
       const onUp = () => {
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
         panelEl.style.cursor = 'grab';
-
         const basePath = this._getPageBasePath();
         if (basePath) {
-          if (isResize) {
-            const w = Math.round((parseFloat(panelEl.style.width) || 30) * 10) / 10;
-            const h = Math.round((parseFloat(panelEl.style.height) || 30) * 10) / 10;
-            this.actor.update({
-              [`${basePath}.panels.${panelId}.width`]: w,
-              [`${basePath}.panels.${panelId}.height`]: h
-            }, { render: false });
-          } else {
-            const posX = Math.round((parseFloat(panelEl.style.left) || 0) * 10) / 10;
-            const posY = Math.round((parseFloat(panelEl.style.top) || 0) * 10) / 10;
-            this.actor.update({
-              [`${basePath}.panels.${panelId}.x`]: posX,
-              [`${basePath}.panels.${panelId}.y`]: posY
-            }, { render: false });
-          }
+          const posX = Math.round((parseFloat(panelEl.style.left) || 0) * 10) / 10;
+          const posY = Math.round((parseFloat(panelEl.style.top) || 0) * 10) / 10;
+          this.actor.update({
+            [`${basePath}.panels.${panelId}.x`]: posX,
+            [`${basePath}.panels.${panelId}.y`]: posY
+          }, { render: false });
         }
       };
-
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
     };
 
+    // Resize handle (SE corner) — shown only during move mode
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'howard-panel-resize-handle';
+    resizeHandle.style.cssText = 'position:absolute; right:2px; bottom:2px; width:14px; height:14px; ' +
+      'background:#e0a23b; border:2px solid #1a1a1d; border-radius:3px; cursor:nwse-resize; z-index:9999;';
+    panelEl.appendChild(resizeHandle);
+
+    const onResizeDown = (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const pageEl = panelEl.closest('.howard-page');
+      const pageRect = pageEl.getBoundingClientRect();
+      const startW = parseFloat(panelEl.style.width) || 30;
+      const startH = parseFloat(panelEl.style.height) || 30;
+      const startMouseX = ev.clientX;
+      const startMouseY = ev.clientY;
+
+      const onMove = (e) => {
+        const newW = Math.max(5, startW + ((e.clientX - startMouseX) / pageRect.width) * 100);
+        const newH = Math.max(5, startH + ((e.clientY - startMouseY) / pageRect.height) * 100);
+        panelEl.style.width = `${newW.toFixed(1)}%`;
+        panelEl.style.height = `${newH.toFixed(1)}%`;
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        const basePath = this._getPageBasePath();
+        if (basePath) {
+          const w = Math.round((parseFloat(panelEl.style.width) || 30) * 10) / 10;
+          const h = Math.round((parseFloat(panelEl.style.height) || 30) * 10) / 10;
+          this.actor.update({
+            [`${basePath}.panels.${panelId}.width`]: w,
+            [`${basePath}.panels.${panelId}.height`]: h
+          }, { render: false });
+        }
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    };
+    resizeHandle.addEventListener('mousedown', onResizeDown);
+
+    // Rotate handle (NE corner) — shown only during move mode
+    const rotateHandle = document.createElement('div');
+    rotateHandle.className = 'howard-panel-rotate-handle';
+    rotateHandle.style.cssText = 'position:absolute; right:2px; top:2px; width:14px; height:14px; ' +
+      'background:#3bb0e0; border:2px solid #1a1a1d; border-radius:50%; cursor:grab; z-index:9999;';
+    panelEl.appendChild(rotateHandle);
+
+    const onRotateDown = (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const r = panelEl.getBoundingClientRect();
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const startAngle = Math.atan2(ev.clientY - cy, ev.clientX - cx);
+      const m = /rotate\(([-0-9.]+)deg\)/.exec(panelEl.style.transform || '');
+      const startRot = m ? parseFloat(m[1]) : 0;
+      let curRot = startRot;
+
+      const onMove = (e) => {
+        const a = Math.atan2(e.clientY - cy, e.clientX - cx);
+        curRot = startRot + (a - startAngle) * 180 / Math.PI;
+        panelEl.style.transform = `rotate(${curRot.toFixed(1)}deg)`;
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        const basePath = this._getPageBasePath();
+        if (basePath) {
+          this.actor.update({
+            [`${basePath}.panels.${panelId}.rotation`]: Math.round(curRot * 10) / 10
+          }, { render: false });
+        }
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    };
+    rotateHandle.addEventListener('mousedown', onRotateDown);
+
+    // Instant tooltips — children of the handle, so they vanish with it (never orphaned)
+    const addTip = (h, label, place) => {
+      const tip = document.createElement('div');
+      tip.textContent = label;
+      tip.style.cssText = `position:absolute; ${place}; background:#1a1a1d; color:#fff; font-size:10px; ` +
+        `padding:2px 5px; border-radius:3px; white-space:nowrap; pointer-events:none; display:none; z-index:10000;`;
+      h.appendChild(tip);
+      h.addEventListener('mouseenter', () => { tip.style.display = 'block'; });
+      h.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+    };
+    addTip(resizeHandle, 'Resize', 'bottom:18px; right:0');
+    addTip(rotateHandle, 'Rotate', 'top:18px; right:0');
+
     panelEl.addEventListener('mousedown', onMouseDown);
     this._movePanelCleanup = () => {
       panelEl.removeEventListener('mousedown', onMouseDown);
+      resizeHandle.removeEventListener('mousedown', onResizeDown);
+      rotateHandle.removeEventListener('mousedown', onRotateDown);
+      resizeHandle.remove();
+      rotateHandle.remove();
       panelEl.style.cursor = '';
       panelEl.classList.remove('howard-panel-highlight');
     };
@@ -2992,16 +3208,20 @@ export default class HowardSheet extends ActorSheet {
     const ix = cx + dx * t;
     const iy = cy + dy * t;
 
+    // Pull the base INSIDE the bubble (toward center) so its seam hides under the bubble fill
+    const baseX = cx + (ix - cx) * 0.4;
+    const baseY = cy + (iy - cy) * 0.4;
+
     // Perpendicular direction for base spread
     const len = Math.sqrt(dx * dx + dy * dy);
     const px = -dy / len;
     const py = dx / len;
-    const spread = 1.2; // percentage units
+    const spread = Math.max(1.2, Math.min(2, Math.min(w, h) * 0.12)); // thin, capped base
 
-    const b1x = (ix + px * spread).toFixed(2);
-    const b1y = (iy + py * spread).toFixed(2);
-    const b2x = (ix - px * spread).toFixed(2);
-    const b2y = (iy - py * spread).toFixed(2);
+    const b1x = (baseX + px * spread).toFixed(2);
+    const b1y = (baseY + py * spread).toFixed(2);
+    const b2x = (baseX - px * spread).toFixed(2);
+    const b2y = (baseY - py * spread).toFixed(2);
 
     return `${b1x},${b1y} ${tx.toFixed(2)},${ty.toFixed(2)} ${b2x},${b2y}`;
   }
@@ -3393,7 +3613,7 @@ export default class HowardSheet extends ActorSheet {
   }
 
   _buildCoverCard(tale, position) {
-    const defaultImg = 'modules/howard-chronicler/images/howard.png';
+    const defaultImg = 'modules/howard-the-chronicler/images/howard.png';
     const coverSrc = tale.coverImage || defaultImg;
 
     return $(`
@@ -3579,6 +3799,8 @@ export default class HowardSheet extends ActorSheet {
     this._readerPageIndex = newIndex;
     this._selectedPanelId = null;
     this._unlockedPanelId = null;
+    this._gmPanelScroll = this.element?.find('.howard-gm-panel, .howard-forge-panel')[0]?.scrollTop ?? null;
+    this._windowContentScroll = this.element?.[0]?.closest('.window-content')?.scrollTop ?? null;
     this.render(false);
 
     setTimeout(() => { this._isAnimating = false; }, 350);
@@ -4140,7 +4362,7 @@ export default class HowardSheet extends ActorSheet {
   static async _loadEnemyLookup() {
     if (HowardSheet._enemyLookup) return HowardSheet._enemyLookup;
     try {
-      const enemyDataPath = game.settings?.get('howard-chronicler', 'enemyDataPath') ?? null;
+      const enemyDataPath = game.settings?.get('howard-the-chronicler', 'enemyDataPath') ?? null;
       if (!enemyDataPath) { HowardSheet._enemyLookup = {}; return {}; }
       const resp = await fetch(enemyDataPath);
       const data = await resp.json();
@@ -4214,21 +4436,6 @@ export default class HowardSheet extends ActorSheet {
   /*  Page Management                           */
   /* ------------------------------------------ */
 
-  _createDefaultPanels(template) {
-    const slotCount = PAGE_TEMPLATES[template]?.slots || 1;
-    const panels = {};
-    for (let i = 0; i < slotCount; i++) {
-      const panelId = `panel-${i}`;
-      panels[panelId] = {
-        id: panelId,
-        type: 'narration',
-        content: '',
-        slot: i
-      };
-    }
-    return panels;
-  }
-
   _onAddPage() {
     const tale = this.actor.system.tales[this._activeTaleId];
     if (!tale) return;
@@ -4273,12 +4480,10 @@ export default class HowardSheet extends ActorSheet {
     const currentPage = pages[this._readerPageIndex];
     if (!currentPage) return;
 
-    const templateLabel = PAGE_TEMPLATES[currentPage.template]?.label || currentPage.template;
-
     const confirmed = await Dialog.confirm({
       title: "Delete Page",
       content: `<p style="color:var(--s2-text); font-family:var(--s2-font);">
-        Delete ${this._getPageLabel()} (${templateLabel})? This cannot be undone.</p>`,
+        Delete ${this._getPageLabel()}? This cannot be undone.</p>`,
       yes: () => true,
       no: () => false,
       defaultYes: false
@@ -4304,58 +4509,6 @@ export default class HowardSheet extends ActorSheet {
     await this.actor.update(updateData);
   }
 
-  /* Removed: _onChangeTemplate (31 lines) */
-
-
-  _showTemplatePickerDialog(callback) {
-    let gridHtml = '<div class="howard-template-grid">';
-    for (const [key, tmpl] of Object.entries(PAGE_TEMPLATES)) {
-      gridHtml += `
-        <div class="howard-template-option" data-template="${key}">
-          <div class="howard-template-thumb">
-            <i class="fas ${tmpl.icon}"></i>
-          </div>
-          <div class="howard-template-label">${tmpl.label}</div>
-          <div class="howard-template-desc">${tmpl.description}</div>
-        </div>
-      `;
-    }
-    gridHtml += '</div>';
-
-    const content = `<div class="howard-dialog">${gridHtml}</div>`;
-    let selectedTemplate = null;
-
-    new Dialog({
-      title: "Choose Page Template",
-      content,
-      buttons: {
-        confirm: {
-          icon: '<i class="fas fa-check"></i>',
-          label: "Add Page",
-          callback: () => {
-            if (selectedTemplate) callback(selectedTemplate);
-          }
-        },
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
-          label: "Cancel"
-        }
-      },
-      default: "confirm",
-      render: (html) => {
-        html.find('.howard-template-option').click(function() {
-          html.find('.howard-template-option').removeClass('selected');
-          $(this).addClass('selected');
-          selectedTemplate = this.dataset.template;
-        });
-        // Pre-select standard
-        html.find('.howard-template-option[data-template="standard"]').click();
-      }
-    }, {
-      classes: ["dialog", "howard-dialog-window"],
-      width: 500
-    }).render(true);
-  }
 
   /* ------------------------------------------ */
   /*  Panel Editing                             */
@@ -4625,7 +4778,7 @@ export default class HowardSheet extends ActorSheet {
         html.find('.howard-cover-preview').click(() => {
           new FilePicker({
             type: "image",
-            current: html.find('input[name="coverImage"]').val() || "modules/howard-chronicler/images/Tales/",
+            current: html.find('input[name="coverImage"]').val() || "modules/howard-the-chronicler/images/Tales/",
             callback: (path) => {
               html.find('input[name="coverImage"]').val(path);
               html.find('.howard-cover-preview').html(`<img src="${path}">`);
@@ -4658,7 +4811,7 @@ export default class HowardSheet extends ActorSheet {
       <div class="howard-dialog">
         <div class="howard-form-group">
           <label>Select Tale to Delete</label>
-          <select name="taleId" style="width:100%; padding:8px 12px; background:var(--s2-bg0); border:2px solid var(--s2-stroke-strong); border-radius:var(--s2-radius-small); color:var(--s2-text); font-family:var(--s2-font); font-size:13px;">
+          <select name="taleId">
             ${options}
           </select>
         </div>
@@ -4699,7 +4852,7 @@ export default class HowardSheet extends ActorSheet {
       default: "cancel"
     }, {
       classes: ["dialog", "howard-dialog-window"],
-      width: 350
+      width: 480
     }).render(true);
   }
 
@@ -4752,6 +4905,386 @@ export default class HowardSheet extends ActorSheet {
     }).render(true);
   }
 
+  /* ------------------------------------------ */
+  /*  Tale Export / Import                       */
+  /* ------------------------------------------ */
+
+  async _onExportTale(tale) {
+    const pages = Object.values(tale.pages || {}).sort((a, b) => a.pageNumber - b.pageNumber);
+
+    // Collect unique scene IDs from all pages
+    const sceneIds = [...new Set(
+      pages.map(p => p.gmNotes?.combatScene).filter(Boolean)
+    )];
+
+    // Fetch an image URL and return base64 data URL
+    const toBase64 = async (path) => {
+      if (!path) return null;
+      try {
+        const url = new URL(path, window.location.origin).href;
+        const res = await fetch(url);
+        const blob = await res.blob();
+        return await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) {
+        console.warn(`Howard | Could not encode image: ${path}`, e);
+        return null;
+      }
+    };
+
+    // Build scene bundles
+    const sceneBundles = [];
+    for (const id of sceneIds) {
+      const scene = game.scenes.get(id);
+      if (!scene) continue;
+
+      // Read area data — check conan scope first, fall back to howard-the-chronicler for testing
+      const rawAreaData = scene.getFlag('conan', 'areaData')
+        ?? scene.getFlag('howard-the-chronicler', 'areaData')
+        ?? null;
+
+      // Resolve token positions into the area records
+      let areaData = null;
+      if (rawAreaData) {
+        const areas = {};
+        for (const [label, area] of Object.entries(rawAreaData.areas || {})) {
+          const token = area.tokenId ? scene.tokens.get(area.tokenId) : null;
+          areas[label] = {
+            label: area.label,
+            gridW: area.gridW ?? 3,
+            gridH: area.gridH ?? 3,
+            x: token?.x ?? area.x ?? null,
+            y: token?.y ?? area.y ?? null
+          };
+        }
+        areaData = {
+          areas,
+          connections: rawAreaData.connections ?? [],
+          losBlockers: rawAreaData.losBlockers ?? [],
+          losOpen: rawAreaData.losOpen ?? []
+        };
+      }
+
+      const bgBase64 = await toBase64(scene.background?.src);
+
+      sceneBundles.push({
+        name: scene.name,
+        width: scene.width ?? 1500,
+        height: scene.height ?? 2200,
+        gridSize: scene.grid?.size ?? 100,
+        padding: scene.padding ?? 0,
+        background: bgBase64,
+        areaData
+      });
+    }
+
+    // Collect all unique image paths from the tale
+    const imagePaths = new Set();
+    const addImg = (p) => { if (p) imagePaths.add(p); };
+    addImg(tale.coverImage);
+    for (const page of pages) {
+      addImg(page.background);
+      for (const img of Object.values(page.images || {})) addImg(img.imagePath);
+      for (const panel of Object.values(page.panels || {})) {
+        addImg(panel.imagePath);
+        for (const layer of Object.values(panel.layers || {})) addImg(layer.imagePath);
+      }
+    }
+
+    // Encode all images as base64
+    ui.notifications.info(`Encoding ${imagePaths.size} image(s)…`);
+    const images = {};
+    for (const path of imagePaths) {
+      const data = await toBase64(path);
+      if (data) images[path] = data;
+    }
+
+    const bundle = {
+      version: 1,
+      system: game.system.id,
+      exportedAt: new Date().toISOString(),
+      tale: foundry.utils.deepClone(tale),
+      images,
+      scenes: sceneBundles
+    };
+
+    const safeName = tale.title.replace(/[^a-z0-9]/gi, '_');
+    const fileName = `${safeName}_Issue${tale.issueNumber}.htale`;
+    const json = JSON.stringify(bundle, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    ui.notifications.info(`Exported "${tale.title}" — ${sceneBundles.length} scene(s) bundled.`);
+  }
+
+  _onImportTale() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.htale';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const bundle = JSON.parse(text);
+        if (!bundle.tale) throw new Error('Invalid .htale file — no tale data found.');
+        await this._importTaleFromBundle(bundle);
+      } catch (err) {
+        ui.notifications.error('Failed to import .htale file: ' + err.message);
+        console.error('Howard | Import error:', err);
+      }
+    };
+    input.click();
+  }
+
+  async _importTaleFromBundle(bundle) {
+    const srcTale = bundle.tale;
+
+    // Step 1: Upload bundled images and build a path remap
+    // Files go into a tale-specific folder so re-imports overwrite cleanly
+    const pathMap = {};
+    const imageEntries = Object.entries(bundle.images || {});
+    const safeTaleName = (bundle.tale.title || 'tale').replace(/[^a-z0-9]/gi, '_');
+    const worldId = game.world.id;
+    const importFolder = `worlds/${worldId}/howard-imported/${safeTaleName}`;
+
+    if (imageEntries.length > 0) {
+      ui.notifications.info(`Uploading ${imageEntries.length} image(s)…`);
+      try {
+        await FilePicker.createDirectory('data', `worlds/${worldId}/howard-imported`);
+      } catch (e) { /* exists */ }
+      try {
+        await FilePicker.createDirectory('data', importFolder);
+      } catch (e) { /* exists */ }
+
+      // Browse existing files so we can skip re-uploading duplicates
+      let existingFiles = new Set();
+      try {
+        const browse = await FilePicker.browse('data', importFolder);
+        for (const f of browse.files) existingFiles.add(f.split('/').pop());
+      } catch (e) { /* folder empty or browse failed */ }
+
+      for (const [origPath, dataUrl] of imageEntries) {
+        try {
+          const origName = origPath.split('/').pop().split('?')[0];
+          const existingPath = `${importFolder}/${origName}`;
+
+          // Reuse existing file — no upload needed
+          if (existingFiles.has(origName)) {
+            pathMap[origPath] = existingPath;
+            continue;
+          }
+
+          const [header, b64] = dataUrl.split(',');
+          const mime = header.match(/:(.*?);/)[1];
+          const binary = atob(b64);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+          const blob = new Blob([bytes], { type: mime });
+          const file = new File([blob], origName, { type: mime });
+          const result = await FilePicker.upload('data', importFolder, file, {}, { notify: false });
+          pathMap[origPath] = result.path;
+        } catch (e) {
+          console.warn(`Howard | Failed to upload image: ${origPath}`, e);
+          pathMap[origPath] = origPath;
+        }
+      }
+    }
+
+    // Step 2: Rewrite image paths in the tale using pathMap
+    const remapPath = (p) => (p && pathMap[p]) ? pathMap[p] : p;
+
+    // Build original page → scene name map BEFORE clearing combatScene
+    // bundle.scenes keyed by name, pages reference by ID
+    const sceneNameById = {};
+    for (const sceneBundle of bundle.scenes || []) {
+      sceneNameById[sceneBundle.name] = sceneBundle.name; // placeholder, resolved below
+    }
+    // Map original page combatScene ID → scene name using bundle scene list
+    // We stored scenes by name so we match via the scene list order
+    const origPageSceneMap = {}; // newPageId → sceneName
+    const srcPageList = Object.values(srcTale.pages || {}).sort((a, b) => a.pageNumber - b.pageNumber);
+
+    const newTaleId = `tale-${Date.now()}`;
+    const newPages = {};
+    const newPageIds = []; // ordered same as srcPageList
+
+    for (const page of srcPageList) {
+      const newPageId = `page-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const newPage = foundry.utils.deepClone(page);
+      newPage.id = newPageId;
+      newPage.background = remapPath(newPage.background);
+      for (const img of Object.values(newPage.images || {})) img.imagePath = remapPath(img.imagePath);
+      for (const panel of Object.values(newPage.panels || {})) {
+        panel.imagePath = remapPath(panel.imagePath);
+        for (const layer of Object.values(panel.layers || {})) layer.imagePath = remapPath(layer.imagePath);
+      }
+      // Stash scene name before clearing
+      if (page.gmNotes?.combatScene) {
+        const origScene = game.scenes.get(page.gmNotes.combatScene);
+        const sceneName = origScene?.name
+          ?? bundle.scenes?.find(s => s.name)?.name  // fallback: match by position
+          ?? null;
+        if (sceneName) origPageSceneMap[newPageId] = sceneName;
+      }
+      newPage.gmNotes = { ...(newPage.gmNotes || {}), combatScene: '' };
+      newPages[newPageId] = newPage;
+      newPageIds.push(newPageId);
+    }
+
+    const newTale = {
+      ...foundry.utils.deepClone(srcTale),
+      id: newTaleId,
+      coverImage: remapPath(srcTale.coverImage),
+      pages: newPages
+    };
+
+    await this.actor.update({ [`system.tales.${newTaleId}`]: newTale });
+    ui.notifications.info(`Imported "${newTale.title}" — creating scenes…`);
+
+    // Step 3: Import scenes
+    const sceneNameToNewId = await this._importScenesFromBundle(bundle.scenes || [], importFolder);
+
+    // Step 4: Rewire combatScene references
+    const sceneUpdates = {};
+    for (const [pageId, sceneName] of Object.entries(origPageSceneMap)) {
+      const newSceneId = sceneNameToNewId[sceneName];
+      if (newSceneId) {
+        sceneUpdates[`system.tales.${newTaleId}.pages.${pageId}.gmNotes.combatScene`] = newSceneId;
+      }
+    }
+    if (Object.keys(sceneUpdates).length > 0) {
+      await this.actor.update(sceneUpdates);
+    }
+
+    ui.notifications.info(`"${newTale.title}" fully imported — ${Object.keys(sceneNameToNewId).length} scene(s) created.`);
+    this.render(false);
+  }
+
+  async _importScenesFromBundle(sceneBundles, importFolder = `worlds/${game.world.id}/howard-imported`) {
+    const sceneNameToNewId = {};
+    if (!sceneBundles.length) return sceneNameToNewId;
+
+    const isConan = game.system.id === 'conan';
+
+    // Browse existing files in the folder once for dedup checks
+    let existingSceneFiles = new Set();
+    try {
+      const browse = await FilePicker.browse('data', importFolder);
+      for (const f of browse.files) existingSceneFiles.add(f.split('/').pop());
+    } catch (e) { /* empty or missing */ }
+
+    // Helper: upload a base64 string to the tale import folder, return server path
+    const uploadBase64 = async (dataUrl, filename) => {
+      if (!dataUrl) return null;
+      // Reuse existing file if already uploaded
+      if (existingSceneFiles.has(filename)) return `${importFolder}/${filename}`;
+      try {
+        const [header, b64] = dataUrl.split(',');
+        const mime = header.match(/:(.*?);/)[1];
+        const binary = atob(b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const blob = new Blob([bytes], { type: mime });
+        const file = new File([blob], filename, { type: mime });
+        const result = await FilePicker.upload('data', importFolder, file, {}, { notify: false });
+        return result.path;
+      } catch (e) {
+        console.warn(`Howard | Failed to upload scene image: ${filename}`, e);
+        return null;
+      }
+    };
+
+    for (const sceneBundle of sceneBundles) {
+      try {
+        // Upload background
+        const safeName = sceneBundle.name.replace(/[^a-z0-9]/gi, '_');
+        const bgPath = await uploadBase64(sceneBundle.background, `scene_${safeName}_bg.jpg`);
+
+        // Create the scene
+        const sceneData = {
+          name: sceneBundle.name,
+          width: sceneBundle.width ?? 1500,
+          height: sceneBundle.height ?? 2200,
+          grid: { size: sceneBundle.gridSize ?? 100 },
+          background: { src: bgPath ?? '' },
+          padding: sceneBundle.padding ?? 0
+        };
+        const [newScene] = await Scene.createDocuments([sceneData]);
+        sceneNameToNewId[sceneBundle.name] = newScene.id;
+
+        // Set area data and place tokens (B&S only)
+        if (isConan && sceneBundle.areaData) {
+          await this._importAreaData(newScene, sceneBundle.areaData);
+        }
+
+        ui.notifications.info(`Scene "${sceneBundle.name}" created.`);
+      } catch (e) {
+        console.error(`Howard | Failed to create scene "${sceneBundle.name}":`, e);
+        ui.notifications.error(`Failed to create scene "${sceneBundle.name}".`);
+      }
+    }
+
+    return sceneNameToNewId;
+  }
+
+  async _importAreaData(scene, areaData) {
+    // Find the area marker actor (npc2 type used by B&S for area tokens)
+    const markerActor = game.actors.find(a => a.type === 'npc2' && a.getFlag('conan', 'isAreaMarker'))
+      ?? game.actors.find(a => a.type === 'npc2');
+
+    const tokenDocs = [];
+    const newAreas = {};
+
+    for (const [label, area] of Object.entries(areaData.areas || {})) {
+      const iconPath = `systems/conan/images/areas/${label.toLowerCase()}_icon.png`;
+      const tokenData = {
+        name: `Area ${label}`,
+        x: area.x ?? 0,
+        y: area.y ?? 0,
+        width: 1,
+        height: 1,
+        texture: { src: iconPath },
+        actorId: markerActor?.id ?? null,
+        actorLink: false,
+        flags: { conan: { areaMarker: { label, gridW: area.gridW ?? 3, gridH: area.gridH ?? 3 } } }
+      };
+      tokenDocs.push(tokenData);
+    }
+
+    const createdTokens = await scene.createEmbeddedDocuments('Token', tokenDocs);
+
+    // Build new areaData with fresh tokenIds
+    for (let i = 0; i < createdTokens.length; i++) {
+      const token = createdTokens[i];
+      const label = token.getFlag('conan', 'areaMarker')?.label;
+      if (!label) continue;
+      const orig = areaData.areas[label];
+      newAreas[label] = {
+        tokenId: token.id,
+        label,
+        gridW: orig.gridW ?? 3,
+        gridH: orig.gridH ?? 3
+      };
+    }
+
+    await scene.setFlag('conan', 'areaData', {
+      areas: newAreas,
+      connections: areaData.connections ?? [],
+      losBlockers: areaData.losBlockers ?? [],
+      losOpen: areaData.losOpen ?? []
+    });
+  }
+
   /** Build a self-contained HTML document for print-to-PDF */
   async _buildPrintDocument(tale, pages, includeGmNotes) {
     const origin = window.location.origin;
@@ -4760,10 +5293,59 @@ export default class HowardSheet extends ActorSheet {
     const pw = 520, ph = 780;
     const pageW = includeGmNotes ? 1100 : pw;
 
+    // The comic page is a CSS container (container-type: size), so any length
+    // expressed in cqw scales with the rendered page. When the print stylesheet
+    // blows the comic up to fill A4/Letter, fonts and padding scale too — the
+    // export looks identical to the editor at any paper size instead of leaving
+    // px text tiny on a large sheet. cqw(px) converts a design px (relative to
+    // the 520px-wide page) into the equivalent container-width percentage.
+    const cqw = (px) => `${(px * 100 / pw).toFixed(3)}cqw`;
+
+    // Collect every image path used by this tale so we can inline them as
+    // base64 data URIs. A standalone .html that only *links* to the Foundry
+    // server renders text fine but loses all images the moment the server is
+    // unreachable or the browser's print/PDF renderer re-fetches them — so we
+    // embed the bytes directly and the exported file becomes self-contained.
+    const coverPath = tale.coverImage || 'modules/howard-the-chronicler/images/howard.png';
+    const imagePaths = new Set();
+    const addImg = (p) => { if (p) imagePaths.add(p); };
+    addImg(coverPath);
+    for (const page of pages) {
+      addImg(page.background);
+      for (const img of Object.values(page.images || {})) addImg(img.imagePath);
+      for (const panel of Object.values(page.panels || {})) {
+        for (const layer of Object.values(panel.layers || {})) addImg(layer.imagePath);
+      }
+    }
+
+    const toDataUrl = async (path) => {
+      try {
+        const res = await fetch(resolve(path));
+        const blob = await res.blob();
+        return await new Promise((ok, fail) => {
+          const reader = new FileReader();
+          reader.onload = () => ok(reader.result);
+          reader.onerror = fail;
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) {
+        console.warn(`Howard | Could not inline image for export: ${path}`, e);
+        return null;
+      }
+    };
+
+    const imgMap = new Map();
+    await Promise.all([...imagePaths].map(async (p) => {
+      const data = await toDataUrl(p);
+      if (data) imgMap.set(p, data);
+    }));
+    // Use the embedded data URI when available, falling back to a live URL.
+    const src = (path) => imgMap.get(path) || resolve(path);
+
     let pagesHtml = '';
 
     // Cover page
-    const coverImg = resolve(tale.coverImage || 'modules/howard-chronicler/images/howard.png');
+    const coverImg = src(coverPath);
     pagesHtml += `<div class="print-page">
       <div class="comic-page">
         <img class="page-bg" src="${coverImg}" />
@@ -4780,12 +5362,12 @@ export default class HowardSheet extends ActorSheet {
       let comicHtml = '';
 
       if (page.background) {
-        comicHtml += `<img class="page-bg" src="${resolve(page.background)}" />`;
+        comicHtml += `<img class="page-bg" src="${src(page.background)}" />`;
       }
 
       const pageImages = Object.values(page.images || {}).sort((a, b) => (a.layerNum || 1) - (b.layerNum || 1));
       for (const img of pageImages) {
-        comicHtml += `<img class="page-layer" src="${resolve(img.imagePath)}" style="z-index:${img.layerNum || 1}; left:${img.posX ?? 0}%; top:${img.posY ?? 0}%" />`;
+        comicHtml += `<img class="page-layer" src="${src(img.imagePath)}" style="z-index:${img.layerNum || 1}; left:${img.posX ?? 0}%; top:${img.posY ?? 0}%" />`;
       }
 
       const panels = Object.values(page.panels || {}).map(p => ({
@@ -4798,7 +5380,7 @@ export default class HowardSheet extends ActorSheet {
         let layersHtml = '';
         const layers = p.layers ? Object.values(p.layers).sort((a, b) => (a.layerNum || 1) - (b.layerNum || 1)) : [];
         for (const l of layers) {
-          layersHtml += `<img class="layer-img" src="${resolve(l.imagePath)}" style="z-index:${l.layerNum || 1}; left:${l.posX ?? 50}%; top:${l.posY ?? 50}%; width:${l.zoom ?? 100}%" />`;
+          layersHtml += `<img class="layer-img" src="${src(l.imagePath)}" style="z-index:${l.layerNum || 1}; left:${l.posX ?? 50}%; top:${l.posY ?? 50}%; width:${l.zoom ?? 100}%" />`;
         }
         const contentHtml = p.content?.trim() ? `<div class="panel-inner"><div class="panel-content">${this._escHtml(p.content)}</div></div>` : '';
         comicHtml += `<div class="${cls}" style="left:${p.x}%; top:${p.y}%; width:${p.width}%; height:${p.height}%; z-index:${p.zIndex};">${layersHtml}${contentHtml}</div>`;
@@ -4811,7 +5393,8 @@ export default class HowardSheet extends ActorSheet {
       })).sort((a, b) => a.zIndex - b.zIndex);
 
       for (const tb of tbs) {
-        comicHtml += `<div class="text-block" style="left:${tb.x}%; top:${tb.y}%; width:${tb.width}%; height:${tb.height}%; z-index:${tb.zIndex};"><div class="text-content tb-style-${tb.style}">${this._escHtml(tb.content || '')}</div></div>`;
+        const tbCls = tb.transparent ? 'text-block tb-transparent' : 'text-block';
+        comicHtml += `<div class="${tbCls}" style="left:${tb.x}%; top:${tb.y}%; width:${tb.width}%; height:${tb.height}%; z-index:${tb.zIndex};"><div class="text-content" style="font-size:${cqw(tb.fontSize ?? 14)};">${this._escHtml(tb.content || '')}</div></div>`;
       }
 
       const sbs = Object.values(page.speechBubbles || {}).map(sb => ({
@@ -4829,7 +5412,7 @@ export default class HowardSheet extends ActorSheet {
       }
 
       for (const sb of sbs) {
-        comicHtml += `<div class="speech-bubble" style="left:${sb.x}%; top:${sb.y}%; width:${sb.width}%; height:${sb.height}%; z-index:${sb.zIndex};"><div class="speech-content">${this._escHtml(sb.content || '')}</div></div>`;
+        comicHtml += `<div class="speech-bubble" style="left:${sb.x}%; top:${sb.y}%; width:${sb.width}%; height:${sb.height}%; z-index:${sb.zIndex};"><div class="speech-content" style="font-size:${cqw(sb.fontSize ?? 13)};">${this._escHtml(sb.content || '')}</div></div>`;
       }
 
       let notesHtml = '';
@@ -4863,32 +5446,34 @@ export default class HowardSheet extends ActorSheet {
 <title>${this._escHtml(tale.title)} — Export</title>
 <link rel="stylesheet" href="${origin}/fonts/fontawesome/css/all.min.css" />
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Montserrat:wght@400;500;600;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Montserrat', sans-serif; background: #222; color: #eee; }
   .toolbar { position: sticky; top: 0; z-index: 9999; background: #1a1a2e; padding: 10px 20px; display: flex; align-items: center; gap: 16px; border-bottom: 2px solid #444; }
   .toolbar h2 { font-size: 16px; flex: 1; }
+  .toolbar-hint { font-size: 12px; color: #aaa; max-width: 320px; line-height: 1.3; }
+  .toolbar-hint strong { color: #c8a84e; }
   .toolbar button { padding: 8px 20px; font-size: 14px; font-weight: 600; border: 2px solid #3182ce; background: #3182ce; color: #fff; border-radius: 6px; cursor: pointer; }
   .toolbar button:hover { background: #2b6cb0; }
   .print-page { display: flex; align-items: flex-start; gap: 0; width: ${pageW}px; height: ${ph}px; margin: 20px auto; background: #111; page-break-after: always; break-after: page; }
   .print-page:last-child { page-break-after: auto; break-after: auto; }
-  .comic-page { position: relative; width: ${pw}px; height: ${ph}px; flex-shrink: 0; overflow: hidden; background: #1a1a2e; }
+  .comic-page { container-type: size; position: relative; width: ${pw}px; height: ${ph}px; flex-shrink: 0; overflow: hidden; background: #1a1a2e; }
   .page-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
   .page-layer { position: absolute; width: 100%; height: 100%; object-fit: cover; border: 0; }
-  .panel { position: absolute; background: #1a1a2e; border: 2px solid #4a5568; border-radius: 3px; overflow: hidden; }
+  .panel { position: absolute; background: #1a1a2e; border: ${cqw(2)} solid #4a5568; border-radius: ${cqw(3)}; overflow: hidden; }
   .panel-transparent { background: transparent; border: none; border-radius: 0; }
   .layer-img { position: absolute; height: auto; max-width: none; max-height: none; transform: translate(-50%, -50%); border: 0; }
-  .panel-inner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 8px; }
-  .panel-content { color: #fff; font-size: 14px; text-align: center; }
-  .text-block { position: absolute; overflow: hidden; padding: 2px; }
-  .text-content { width: 100%; height: 100%; overflow: hidden; font-size: 16px; font-weight: 500; line-height: 1.4; color: #f0e6d2; background: rgba(0,0,0,0.75); padding: 6px 10px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.1); }
-  .tb-style-speech { background: #fff; color: #1a1a1a; font-weight: 400; border-radius: 14px; border: 2px solid #333; }
-  .tail-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 14; pointer-events: none; }
-  .speech-bubble { position: absolute; overflow: visible; border-radius: 14px; border: 2px solid #333; background: #fff; padding: 8px 14px; }
-  .speech-content { width: 100%; height: 100%; overflow: hidden; color: #000; font-size: 16px; font-weight: 600; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap; }
-  .cover-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 20px 16px 16px; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); }
-  .cover-issue { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #c8a84e; margin-bottom: 4px; }
-  .cover-title { font-size: 22px; font-weight: bold; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); line-height: 1.2; }
+  .panel-inner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: ${cqw(8)}; }
+  .panel-content { color: #fff; font-size: ${cqw(14)}; text-align: center; }
+  .text-block { position: absolute; overflow: hidden; padding: ${cqw(6)} ${cqw(8)}; box-sizing: border-box; background: #000; }
+  .text-block.tb-transparent { background: transparent; }
+  .text-content { width: 100%; height: 100%; overflow: hidden; font-family: 'Comic Neue', 'Comic Sans MS', cursive; font-size: ${cqw(14)}; font-weight: 700; line-height: 1.4; color: #fff; }
+  .tail-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; overflow: visible; }
+  .speech-bubble { position: absolute; overflow: visible; border-radius: ${cqw(14)}; border: ${cqw(2)} solid #333; background: #fff; padding: ${cqw(8)} ${cqw(14)}; }
+  .speech-content { width: 100%; height: 100%; overflow: hidden; color: #000; font-family: 'Bangers', 'Comic Sans MS', cursive; font-size: ${cqw(13)}; font-weight: 400; letter-spacing: 0.03em; line-height: 1.3; word-wrap: break-word; white-space: pre-wrap; }
+  .cover-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: ${cqw(20)} ${cqw(16)} ${cqw(16)}; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); }
+  .cover-issue { display: block; font-size: ${cqw(11)}; text-transform: uppercase; letter-spacing: ${cqw(2)}; color: #c8a84e; margin-bottom: ${cqw(4)}; }
+  .cover-title { font-size: ${cqw(22)}; font-weight: bold; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); line-height: 1.2; }
   .notes-panel { width: ${pageW - pw}px; height: ${ph}px; flex-shrink: 0; overflow: auto; padding: 20px 24px; background: #1a1a2e; border-left: 2px solid #4a5568; color: #ddd; font-size: 13px; line-height: 1.6; }
   .notes-label { color: #888; font-style: italic; }
   .notes-title { font-size: 16px; color: #c8a84e; margin-bottom: 8px; }
@@ -4898,15 +5483,36 @@ export default class HowardSheet extends ActorSheet {
   .notes-text { margin-top: 4px; white-space: pre-wrap; }
   @media print {
     .toolbar { display: none !important; }
-    body { background: #fff; margin: 0; padding: 0; }
-    @page { size: ${pageW}px ${ph}px; margin: 0; }
-    .print-page { margin: 0; box-shadow: none; }
+    html, body { background: #fff; margin: 0; padding: 0; }
+    /* Use orientation only — a custom px @page size is ignored once the
+       print dialog has a paper size selected, which left the fixed-size
+       comic centered on a big sheet with wide white margins. Instead we
+       scale each page to fill the printable area, preserving the comic's
+       aspect ratio (small letterbox bars are unavoidable when the paper
+       ratio differs, but the image is now as large as it can be). */
+    /* Default the print dialog to Tabloid (11x17) with no margins. Tabloid's
+       0.647 ratio is almost identical to the comic's 2:3, so the page fills
+       edge-to-edge with no white border. Chrome seeds the dialog's paper-size
+       and margin controls from this rule. */
+    @page { size: ${includeGmNotes ? '17in 11in' : '11in 17in'}; margin: 0; }
+    .print-page {
+      width: 100%; height: 100vh; margin: 0; box-shadow: none; background: #fff;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+      break-inside: avoid; page-break-after: always; break-after: page;
+    }
+    .print-page:last-child { page-break-after: auto; break-after: auto; }
+    .comic-page {
+      height: 100vh; width: calc(100vh * ${pw} / ${ph});
+      max-width: 100%; flex-shrink: 0;
+    }${includeGmNotes ? `
+    .notes-panel { height: 100vh; width: auto; flex: 1 1 0; }` : ''}
     * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   }
 </style>
 </head><body>
 <div class="toolbar">
   <h2>${this._escHtml(tale.title)} — Issue #${tale.issueNumber}</h2>
+  <span class="toolbar-hint">If you see white borders, set Paper&nbsp;size to <strong>Tabloid</strong> and Margins to <strong>None</strong>.</span>
   <button onclick="window.print()"><i class="fas fa-print"></i> Print / Save PDF</button>
 </div>
 ${pagesHtml}
@@ -4953,7 +5559,7 @@ ${pagesHtml}
       whisper: [],
       blind: true,
       flags: {
-        "howard-chronicler": {
+        "howard-the-chronicler": {
           howardShow: true,
           taleId: taleId,
           pageIndex: pageIndex
@@ -5021,7 +5627,7 @@ ${pagesHtml}
     if (action) {
       const msg = await ChatMessage.create({
         content: '', whisper: [], blind: true,
-        flags: { "howard-chronicler": { howardReveal: true, action, key: String(slot), pageId: currentPage.id } }
+        flags: { "howard-the-chronicler": { howardReveal: true, action, key: String(slot), pageId: currentPage.id } }
       });
       if (msg) msg.delete();
     }
@@ -5055,7 +5661,7 @@ ${pagesHtml}
     if (action) {
       const msg = await ChatMessage.create({
         content: '', whisper: [], blind: true,
-        flags: { "howard-chronicler": { howardReveal: true, action, key: tbId, pageId: currentPage.id } }
+        flags: { "howard-the-chronicler": { howardReveal: true, action, key: tbId, pageId: currentPage.id } }
       });
       if (msg) msg.delete();
     }
@@ -5101,7 +5707,7 @@ ${pagesHtml}
     // Broadcast to players so their view re-renders with updated page visibility
     const msg = await ChatMessage.create({
       content: '', whisper: [], blind: true,
-      flags: { "howard-chronicler": { howardPageVisibility: true, taleId: this._activeTaleId } }
+      flags: { "howard-the-chronicler": { howardPageVisibility: true, taleId: this._activeTaleId } }
     });
     if (msg) msg.delete();
   }
@@ -5119,7 +5725,7 @@ ${pagesHtml}
     const msg = await ChatMessage.create({
       content: '', whisper: [], blind: true,
       flags: {
-        "howard-chronicler": {
+        "howard-the-chronicler": {
           howardPresZoom: true,
           taleId: this._activeTaleId,
           pageIndex: this._readerPageIndex,
@@ -5152,8 +5758,16 @@ ${pagesHtml}
           <input type="number" class="rollcall-tn" value="5" min="1" max="99" />
         </div>
         <div class="rollcall-row" style="flex-direction:column; align-items:stretch;">
+          <label class="rollcall-label">Description <span style="color:#666;font-weight:400;">(shown to players)</span></label>
+          <textarea class="rollcall-description" rows="2" placeholder="Flavor text shown to players..."></textarea>
+        </div>
+        <div class="rollcall-row" style="flex-direction:column; align-items:stretch;">
           <label class="rollcall-label">Success Text <span style="color:#666;font-weight:400;">(hidden until reveal)</span></label>
-          <textarea class="rollcall-success-text" rows="3" placeholder="Revealed on success..."></textarea>
+          <textarea class="rollcall-success-text" rows="2" placeholder="Revealed on success..."></textarea>
+        </div>
+        <div class="rollcall-row" style="flex-direction:column; align-items:stretch;">
+          <label class="rollcall-label">Fail Text <span style="color:#666;font-weight:400;">(blank = auto-generated)</span></label>
+          <textarea class="rollcall-fail-text" rows="2" placeholder="Leave blank for auto-generated..."></textarea>
         </div>
       </div>`;
 
@@ -5171,8 +5785,10 @@ ${pagesHtml}
             }
             const dc = parseInt(html.find('.rollcall-tn').val()) || 5;
             const prompt = html.find('.rollcall-success-text').val().trim();
+            const description = html.find('.rollcall-description').val().trim();
+            const failText = html.find('.rollcall-fail-text').val().trim();
 
-            const check = { skillName, dc, prompt };
+            const check = { skillName, dc, prompt, description, failText };
             this._fireRollCall(check);
           }
         },
@@ -5193,8 +5809,9 @@ ${pagesHtml}
 
   /** Fire an ad-hoc roll call check — chat card + GM dialog */
   async _fireRollCall(check) {
-    const howardImg = 'modules/howard-chronicler/images/howard.png';
+    const howardImg = 'modules/howard-the-chronicler/images/howard.png';
     const esc = (s) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const descHtml = check.description ? `<div class="howard-check-description" style="font-style:italic;color:#ccc;font-size:12px;margin-top:6px;">${esc(check.description)}</div>` : '';
 
     const content = `
       <div class="conan-roll spell-chat-card howard-check-card">
@@ -5211,6 +5828,7 @@ ${pagesHtml}
           <div class="spell-chat-meta">
             <strong>${esc(check.skillName)}</strong> &nbsp;|&nbsp; <span style="color: #FFD700;">Difficulty ${check.dc}</span>
           </div>
+          ${descHtml}
         </div>
       </div>
     `;
@@ -5378,12 +5996,8 @@ ${pagesHtml}
     // DOM update on GM side
     const el = this.element.find(`[data-panel-id="${elId}"], [data-tb-id="${elId}"], [data-sb-id="${elId}"]`);
     if (isCurrentlyHidden) {
-      el.find('.howard-hidden-eye').remove();
       this.element.find(`.howard-speech-tail-svg polygon[data-sb-id="${elId}"]`).removeClass('howard-element-hidden');
     } else {
-      if (!el.find('.howard-hidden-eye').length) {
-        el.append('<div class="howard-hidden-eye"><i class="fas fa-eye-slash"></i></div>');
-      }
       this.element.find(`.howard-speech-tail-svg polygon[data-sb-id="${elId}"]`).addClass('howard-element-hidden');
     }
 
@@ -5395,11 +6009,17 @@ ${pagesHtml}
       eyeBtn.removeClass('fa-eye').addClass('fa-eye-slash');
     }
 
+    // Update the theater canvas layer locally (GM side)
+    const theaterLayer = canvas.howardTheater;
+    if (theaterLayer) {
+      theaterLayer.setElementVisibility(elId, isCurrentlyHidden);  // was hidden, now revealed (or vice versa)
+    }
+
     // Broadcast to players
     const msg = await ChatMessage.create({
       content: '', whisper: [], blind: true,
       flags: {
-        "howard-chronicler": {
+        "howard-the-chronicler": {
           howardPresReveal: true,
           action: isCurrentlyHidden ? 'reveal' : 'hide',
           elId: elId,
@@ -5417,7 +6037,7 @@ ${pagesHtml}
       whisper: [],
       blind: true,
       flags: {
-        "howard-chronicler": {
+        "howard-the-chronicler": {
           howardDismiss: true
         }
       }
@@ -5428,12 +6048,59 @@ ${pagesHtml}
   }
 
   /**
+   * Theater button — activate the Theater scene (first click) or publish current page (subsequent clicks).
+   */
+  async _onTheaterButton() {
+    const MODULE_ID = 'howard-the-chronicler';
+    const theaterScene = game.scenes.find(s => s.getFlag(MODULE_ID, 'isTheater'));
+    if (!theaterScene) {
+      ui.notifications.error('Theater scene not found.');
+      return;
+    }
+
+    // If not already on the Theater scene, activate it (pulls everyone there)
+    if (canvas.scene?.id !== theaterScene.id) {
+      ui.notifications.info('Switching to Theater scene...');
+      await theaterScene.activate();
+      // Wait for canvas to finish drawing
+      await new Promise(r => setTimeout(r, 500));
+    }
+
+    // Publish the current page to the theater layer
+    const taleId = this._activeTaleId;
+    const pageIndex = this._readerPageIndex;
+    if (!taleId) {
+      ui.notifications.warn('No tale is open to project.');
+      return;
+    }
+
+    // Update the local theater layer
+    const layer = canvas.howardTheater;
+    if (layer) {
+      layer.publishPage(taleId, pageIndex);
+    }
+
+    // Broadcast to all players so their theater layers update too
+    const msg = await ChatMessage.create({
+      content: '', whisper: [], blind: true,
+      flags: {
+        [MODULE_ID]: {
+          howardTheaterPublish: true,
+          taleId,
+          pageIndex
+        }
+      }
+    });
+    if (msg) msg.delete();
+  }
+
+  /**
    * Handle a "show" broadcast received on a player client.
    * Opens Howard at the target tale/page, with cover animation on first show.
    */
   static async handleShowBroadcast(taleId, pageIndex) {
     // Find the Howard actor
-    const howard = game.actors.find(a => a.type === 'howard-chronicler.howard');
+    const howard = game.actors.find(a => a.type === 'howard-the-chronicler.howard');
     if (!howard) return;
 
     // Verify the tale exists
@@ -5484,7 +6151,7 @@ ${pagesHtml}
    * Handle a "dismiss" broadcast — close the sheet on player side.
    */
   static handleDismissBroadcast() {
-    const howard = game.actors.find(a => a.type === 'howard-chronicler.howard');
+    const howard = game.actors.find(a => a.type === 'howard-the-chronicler.howard');
     if (!howard) return;
 
     const sheet = howard.sheet;
@@ -5499,7 +6166,7 @@ ${pagesHtml}
    * Does a targeted DOM update instead of a full re-render.
    */
   static handleRevealBroadcast(action, key, pageId) {
-    const howard = game.actors.find(a => a.type === 'howard-chronicler.howard');
+    const howard = game.actors.find(a => a.type === 'howard-the-chronicler.howard');
     if (!howard) return;
 
     const sheet = howard.sheet;
@@ -5533,7 +6200,7 @@ ${pagesHtml}
    * Navigates to the correct page if needed, then shows/hides the element.
    */
   static async handlePresRevealBroadcast(action, elId, taleId, pageIndex) {
-    const howard = game.actors.find(a => a.type === 'howard-chronicler.howard');
+    const howard = game.actors.find(a => a.type === 'howard-the-chronicler.howard');
     if (!howard) return;
 
     const sheet = howard.sheet;
@@ -5584,7 +6251,7 @@ ${pagesHtml}
    * Navigates to the correct page if needed, then shows zoom overlay.
    */
   static async handlePresZoomBroadcast(taleId, pageIndex, elId) {
-    const howard = game.actors.find(a => a.type === 'howard-chronicler.howard');
+    const howard = game.actors.find(a => a.type === 'howard-the-chronicler.howard');
     if (!howard) return;
 
     const sheet = howard.sheet;

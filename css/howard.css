@@ -1,5 +1,7 @@
 /* Howard the Chronicler - Standalone CSS */
 
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@700&display=swap');
+
 :root {
   /* Standalone defaults for --s2-* variables (originally from conan2.css) */
 
@@ -181,7 +183,7 @@
   display: flex;
   gap: 12px;
   z-index: 1000;
-  pointer-events: auto;
+  pointer-events: none;
 }
 .howard-pres-ctrl {
   width: 40px;
@@ -195,6 +197,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  pointer-events: auto;
   padding: 0;
   transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
@@ -1395,6 +1398,26 @@
   margin-bottom: 6px;
 }
 
+.howard-text-edit-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.howard-text-fontsize-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.howard-text-fontsize-display {
+  font-size: 11px;
+  color: var(--s2-text-muted);
+  min-width: 30px;
+  text-align: center;
+}
+
 .howard-text-edit-area:focus {
   outline: none;
   border-color: var(--s2-accent);
@@ -1420,7 +1443,9 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  font-family: 'Comic Neue', 'Comic Sans MS', cursive;
   font-size: 11px;
+  font-weight: 700;
   line-height: 1.4;
   color: #fff;
   background: none;
@@ -1528,9 +1553,11 @@
   height: 100%;
   overflow: hidden;
   color: #000;
+  font-family: 'Bangers', 'Comic Sans MS', cursive;
   font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
   word-wrap: break-word;
   white-space: pre-wrap;
 }
@@ -1800,7 +1827,7 @@
 
 .howard-header-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 6px;
 }
 
@@ -1874,20 +1901,17 @@
 .howard-header-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  padding: 0;
   background: var(--s2-panel);
   border: 2px solid var(--s2-stroke-strong);
   border-radius: var(--s2-radius-small);
   color: var(--s2-muted);
-  font-family: var(--s2-font);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-size: 18px;
   cursor: pointer;
   transition: all 0.15s ease;
-  white-space: nowrap;
 }
 
 .howard-header-btn:hover {
@@ -2938,6 +2962,21 @@
   outline: none;
   border-color: var(--s2-accent);
   box-shadow: 0 0 8px var(--s2-accent-glow);
+}
+
+.howard-form-group select {
+  width: 100%;
+  height: auto;
+  min-height: 34px;
+  padding: 6px 12px;
+  line-height: 1.4;
+  background: var(--s2-bg0);
+  border: 2px solid var(--s2-stroke-strong);
+  border-radius: var(--s2-radius-small);
+  color: var(--s2-text);
+  font-family: var(--s2-font);
+  font-size: 13px;
+  box-sizing: border-box;
 }
 
 .howard-cover-preview {
@@ -4847,14 +4886,40 @@
 /* =============================================
    Presentation GM Notes Dialog
    ============================================= */
+.pres-gm-notes-dialog {
+  background: #1a1a1e !important;
+  color: #fff !important;
+}
+.pres-gm-notes-dialog .window-header {
+  background: #111114 !important;
+  color: #fff !important;
+  border-bottom: 1px solid #333 !important;
+}
+.pres-gm-notes-dialog .window-header .window-title {
+  color: #fff !important;
+}
+.pres-gm-notes-dialog .window-header .close {
+  color: #fff !important;
+}
+.pres-gm-notes-dialog .window-content {
+  background: #1a1a1e !important;
+  color: #fff !important;
+}
 .pres-gm-notes-dialog .dialog-content {
   padding: 0 !important;
   height: 100%;
   overflow: hidden;
+  background: #1a1a1e !important;
 }
 .pres-gm-notes-dialog .dialog-buttons {
   flex: 0 0 auto !important;
   padding: 4px 14px 8px;
+  background: #1a1a1e !important;
+}
+.pres-gm-notes-dialog .dialog-buttons button {
+  background: #2a2a2e !important;
+  color: #fff !important;
+  border: 1px solid #444 !important;
 }
 .pres-gm-dialog {
   display: flex;
@@ -5095,16 +5160,19 @@
   border-color: #4CAF50;
   color: #81C784;
 }
-.gm-check-reveal-btn {
+.gm-check-btn-row {
+  display: flex;
+  gap: 8px;
+}
+.gm-check-pass-btn,
+.gm-check-fail-btn {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   padding: 9px 12px;
-  background: linear-gradient(135deg, #2a2210, #1a1508);
-  border: 2px solid #c8a84e;
   border-radius: 6px;
-  color: #FFD700;
   font-family: 'Montserrat', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 700;
@@ -5113,9 +5181,23 @@
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.gm-check-reveal-btn:hover {
-  background: linear-gradient(135deg, #3a3218, #2a2210);
-  box-shadow: 0 0 12px rgba(200, 168, 78, 0.4);
+.gm-check-pass-btn {
+  background: linear-gradient(135deg, #1a2a10, #0f1a08);
+  border: 2px solid #4CAF50;
+  color: #81C784;
+}
+.gm-check-pass-btn:hover {
+  background: linear-gradient(135deg, #2a3a18, #1a2a10);
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
+}
+.gm-check-fail-btn {
+  background: linear-gradient(135deg, #2a1010, #1a0808);
+  border: 2px solid #e53935;
+  color: #ef9a9a;
+}
+.gm-check-fail-btn:hover {
+  background: linear-gradient(135deg, #3a1818, #2a1010);
+  box-shadow: 0 0 12px rgba(229, 57, 53, 0.4);
 }
 .gm-check-empty {
   font-size: 12px;
